@@ -1,28 +1,30 @@
 # Import libraries
 from flask import render_template, session, redirect, url_for, request, send_from_directory
 from app.main import bp
-from app.connector import get, add, edit, delete, search
+# from app.mysq_connector import get, add, edit, delete, search
+from app.dynamodb_connector import get, add, edit, delete, search
+import time
 
-# Read operation: List all transactions
 @bp.route("/")
 def index():
     user = session.get('user')
 
     if user:
+        # Read operation: List all transactions
         transactions = get()
         return render_template("transactions.html", transactions=transactions)
     else:
         return redirect(url_for('main.login'))
 
-# def get_transactions():
-#    transactions = get()
-#    return render_template("transactions.html", transactions=transactions)
+def generate_id():
+    return int(time.time() * 1000)
 
 # Create operation: Display add transaction form
 @bp.route("/add", methods=["GET", "POST"])
 def add_transaction():
     if request.method == 'POST':
-        add(request.form['date'],request.form['amount'])
+        id = generate_id()
+        add(id, request.form['date'],request.form['amount'])
         return redirect(url_for("main.index"))
     return render_template("form.html")
 
@@ -32,7 +34,7 @@ def edit_transaction(transaction_id):
     transactions = get()
     if request.method == 'POST':
         date = request.form['date']
-        amount = float(request.form['amount'])
+        amount = int(request.form['amount'])
         edit(transaction_id, date, amount)
 
         return redirect(url_for("main.index"))
