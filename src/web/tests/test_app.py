@@ -2,16 +2,18 @@ from app import create_app
 from datetime import datetime
 import unittest
 from bs4 import BeautifulSoup
+from config import Config  # Eğer Config gerekiyorsa ekle
 
 class FlaskAppTestCase(unittest.TestCase):
     def setUp(self):
-        self.app = create_app()
+        self.app = create_app(Config)
         self.app.config['TESTING'] = True
         self.client = self.app.test_client()
 
     def test_crud_operations(self):
         # 1. Add transaction via POST request
         response = self.client.post('/add', data={'date': '2030-12-31', 'amount': '311229'})
+        print("Response:",response)
         self.assertEqual(response.status_code, 302)  # Redirects after adding
 
         # 2. Fetch the latest transaction to retrieve the ID

@@ -112,14 +112,12 @@ h1, h2, h3 {
 }
 
 .top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    text-align: right;
     margin-bottom: 20px;
 }
 
 .btn-logout {
-    background-color: #bb4c57;
+    background-color: #5a5a5a;
     color: white;
     padding: 6px 12px;
     text-decoration: none;

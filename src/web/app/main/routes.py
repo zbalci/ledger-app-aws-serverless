@@ -1,14 +1,12 @@
 # Import libraries
 from flask import render_template, session, redirect, url_for, request, send_from_directory
 from app.main import bp
-# from app.mysq_connector import get, add, edit, delete, search
-from app.dynamodb_connector import get, add, edit, delete, search
+from app.connector import get, add, edit, delete, search
 import time
 
 @bp.route("/")
 def index():
     user = session.get('user')
-
     if user:
         # Read operation: List all transactions
         transactions = get()

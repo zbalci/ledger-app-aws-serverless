@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 from config import Config
 from app.extensions import oauth, sess
 import os
@@ -15,6 +15,15 @@ def create_app(config_class=Config):
     
     #Init session
     sess.init_app(app)
+
+    #If TESTING=True bypass auth
+    @app.before_request
+    def inject_test_user():
+        if app.config.get("TESTING"):
+            session.setdefault("user", {
+                "given_name": "test-user",
+                "email": "test@test.com"
+            })
 
     # Register blueprints here
     from app.main import bp as main_bp
