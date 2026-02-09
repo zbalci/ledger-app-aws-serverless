@@ -1,0 +1,10 @@
+Flask==2.2.5
+Werkzeug==3.0.3
+unittest2
+beautifulsoup4
+authlib
+requests
+boto3
+aws_lambda_wsgi
+flask-session
+mypy-boto3-dynamodb
