@@ -5,7 +5,8 @@ from config import Config  # Eğer Config gerekiyorsa ekle
 app = create_app(Config)
 
 if __name__ == '__main__':
-   app.run(debug=True, host='0.0.0.0', port=8080)
+   context = ('cert/fullchain.pem', 'cert/privkey.pem')
+   app.run(debug=True, host='0.0.0.0', port=8443, ssl_context=context)
 
 # # Flask'ı Lambda ile çalışacak şekilde yapılandırın
 # # AWS Lambda ortamında WSGI'yi çalıştıran serverless_wsgi modülünü kullanın

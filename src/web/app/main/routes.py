@@ -6,17 +6,21 @@ from app.connector import get, add, edit, delete, search
 # Read operation: List all transactions
 @bp.route("/")
 def index():
-    # user = session.get('user')
-    user = True
+    user = session.get('user')
+    print(user)
+    # email = user.get("email") 
+    # print("Email:",email)
+
+    # user = True
     if user:
         transactions = get()
         return render_template("transactions.html", transactions=transactions)
     else:
         return redirect(url_for('main.login'))
 
-def get_transactions():
-   transactions = get()
-   return render_template("transactions.html", transactions=transactions)
+# def get_transactions():
+#    transactions = get()
+#    return render_template("transactions.html", transactions=transactions)
 
 # Create operation: Display add transaction form
 @bp.route("/add", methods=["GET", "POST"])
