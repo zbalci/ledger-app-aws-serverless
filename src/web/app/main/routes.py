@@ -7,11 +7,7 @@ from app.connector import get, add, edit, delete, search
 @bp.route("/")
 def index():
     user = session.get('user')
-    print(user)
-    # email = user.get("email") 
-    # print("Email:",email)
 
-    # user = True
     if user:
         transactions = get()
         return render_template("transactions.html", transactions=transactions)
