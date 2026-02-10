@@ -4,3 +4,4 @@ venv/
 cert/
 layer_build/
 notesfile.txt
+*.zip
