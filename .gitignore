@@ -2,5 +2,5 @@
 __pycache__/
 venv/
 cert/
-python_dir/
+layer_build/
 notesfile.txt

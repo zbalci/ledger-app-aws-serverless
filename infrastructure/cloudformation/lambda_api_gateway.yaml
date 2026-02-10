@@ -1,0 +1,67 @@
+Parameters:
+  AppName:
+    Type: String
+    Description: App name
+    Default: ledger
+  Environment:
+    Type: String
+    Description: Environment name
+    Default: dev
+
+Resources:
+  ApiGateway:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub "${AppName}-${Environment}-api-gateway"
+      ProtocolType: HTTP
+
+  ApiGatewayIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiGateway
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LedgerLambdaArn}/invocations
+          - LedgerLambdaArn:
+              Fn::ImportValue: !Sub "${AppName}-${Environment}-lambda-function-arn"
+      PayloadFormatVersion: "2.0"
+
+  ApiGatewayRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGateway
+      RouteKey: "ANY /{proxy+}"
+      Target: !Sub "integrations/${ApiGatewayIntegration}"
+
+  ApiGatewayStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref ApiGateway
+      StageName: $default
+      AutoDeploy: true
+
+  ApiGatewayInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: 
+        Fn::ImportValue: !Sub "${AppName}-${Environment}-lambda-function-name"
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*"
+
+  LedgerCustomDomain:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: ledger.zekibalci.com
+      DomainNameConfigurations:
+        - CertificateArn: arn:aws:acm:eu-north-1:253712034003:certificate/b50ea7e2-db47-4fab-b762-59c688a549d0
+          EndpointType: REGIONAL
+          SecurityPolicy: TLS_1_2
+
+  LedgerApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      ApiId: !Ref ApiGateway
+      DomainName: !Ref LedgerCustomDomain
+      Stage: $default
