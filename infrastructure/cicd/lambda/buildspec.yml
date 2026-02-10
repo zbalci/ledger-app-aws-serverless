@@ -1,36 +1,77 @@
 version: 0.2
 
+env:
+  variables:
+    S3_BUCKET: ledger-app-aws-lambda
+
 phases:
   install:
     runtime-versions:
-      python: 3.11
+      python: 3.12
+
+  pre_build:
     commands:
-      - pip install --upgrade pip
+      - set -e
+      - cd $CODEBUILD_SRC_DIR
+
+      - echo ">>> Detecting changed files"
+
+      - |
+        if git rev-parse HEAD~1 >/dev/null 2>&1; then
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+        else
+          echo "No previous commit found, treating all files as changed"
+          CHANGED_FILES=$(git diff --name-only HEAD)
+        fi
+
+      - echo "$CHANGED_FILES"
+
+      - BUILD_LAYER=false
+      - BUILD_FUNCTION=false
+
+      - |
+        if echo "$CHANGED_FILES" | grep -q '^src/layers/'; then
+          BUILD_LAYER=true
+        fi
+
+      - |
+        if echo "$CHANGED_FILES" | grep -q '^src/web/'; then
+          BUILD_FUNCTION=true
+        fi
 
   build:
     commands:
-      - echo "=== Packaging Lambda Function ==="
-      - cd infrastructure/assets/db-init/lambda
-      - zip db-init-function.zip handler.py
-      - cd -
+      - |
+        if [ "$BUILD_LAYER" = true ]; then
+          echo ">>> Building Lambda Layer"
 
-      - echo "=== Building Lambda Layer ==="
-      - mkdir -p layer_build/python/lib/python3.11/site-packages
-      - pip install -r infrastructure/assets/db-init/lambda/requirements.txt -t layer_build/python/lib/python3.11/site-packages
-      - cd layer_build
-      - zip -r ../db-init-layer.zip python
-      - cd -
+          mkdir -p build/layer/python
+          pip install -r src/layers/python/requirements.txt \
+            -t build/layer/python
 
-  post_build:
-    commands:
-      - echo "=== Uploading Artifacts ==="
-      - aws s3 cp infrastructure/assets/db-init/lambda/db-init-function.zip s3://$ASSET_BUCKET/db-init/lambda/db-init-function.zip
+          cd build/layer
+          zip -r ../../layer.zip .
+          cd -
 
-      - aws s3 cp db-init-layer.zip s3://$ASSET_BUCKET/db-init/lambda/db-init-layer.zip
+          aws s3 cp layer.zip s3://$S3_BUCKET/build/
+        else
+          echo ">>> Layer unchanged, skip"
+        fi
 
-      - aws s3 cp infrastructure/assets/db-init/sql/init.sql s3://$ASSET_BUCKET/db-init/sql/init.sql
+      - |
+        if [ "$BUILD_FUNCTION" = true ]; then
+          echo ">>> Building Lambda Function"
+
+          cd src/web
+          zip -r ../../function.zip app config.py lambda_function.py
+          cd -
+
+          aws s3 cp function.zip s3://$S3_BUCKET/build/
+        else
+          echo ">>> Function unchanged, skip"
+        fi
 
 artifacts:
   files:
-    - infrastructure/assets/db-init/lambda/db-init-function.zip
-    - db-init-layer.zip
+    - layer.zip
+    - function.zip

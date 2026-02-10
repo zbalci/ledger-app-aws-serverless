@@ -8,8 +8,23 @@ Parameters:
     Description: Environment name
     Default: dev
 
+  LambdaBucket:
+    Type: String
+    Description: S3 bucket name used by lambda
+    Default: ledger-app-aws-lambda
+
+  LambdaLayerKey:
+    Type: String
+    Description: S3 bucket key used by lambda layer zip
+    Default: ledger_layer.zip
+
+  LambdaFunctionKey:
+    Type: String
+    Description: S3 bucket key used by lambda function zip
+    Default: ledger_function_noauth.zip
+
 Resources:
-  LambdaFunctionRole:
+  DatabaseInitFunctionRole:
       Type: AWS::IAM::Role
       Properties:
         AssumeRolePolicyDocument:
@@ -30,18 +45,29 @@ Resources:
                   Action: dynamodb:*
                   Resource: "*"
 
+  LambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: !Sub "${AppName}-${Environment}-lambda-layer"
+      CompatibleRuntimes:
+        - python3.12
+      Content:
+        S3Bucket: !Ref LambdaBucket
+        S3Key: !Ref LambdaLayerKey
+
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub "${AppName}-${Environment}-lambda-function"
       Runtime: python3.12
       Handler: lambda_function.lambda_handler
-      Role: !GetAtt LambdaFunctionRole.Arn
+      Role: !GetAtt DatabaseInitFunctionRole.Arn
       Timeout: 300
       Code:
-        ZipFile: |
-          def lambda_handler(event, context):
-              return {"statusCode": 200, "body": "bootstrap"}
+        S3Bucket: !Ref LambdaBucket
+        S3Key: !Ref LambdaFunctionKey
+      Layers:
+        - !Ref LambdaLayer
 
 Outputs:
   LambdaFunctionName:
