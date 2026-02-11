@@ -1,0 +1,34 @@
+Parameters:
+  AppName:
+    Type: String
+    Description: App name
+
+  Environment:
+    Type: String
+    Description: Environment name
+
+  LambdaBucket:
+    Type: String
+    Description: S3 bucket name used by lambda
+
+  LambdaLayerKey:
+    Type: String
+    Description: S3 bucket key used by lambda layer zip
+
+Resources:
+  LambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: !Sub "${AppName}-${Environment}-lambda-layer"
+      CompatibleRuntimes:
+        - python3.12
+      Content:
+        S3Bucket: !Ref LambdaBucket
+        S3Key: !Ref LambdaLayerKey
+
+Outputs:
+  LambdaLayerName:
+    Description: "Ledger lambda layer name"
+    Value: !Ref LambdaLayer
+    Export:
+      Name: !Sub "${AppName}-${Environment}-lambda-layer-name"

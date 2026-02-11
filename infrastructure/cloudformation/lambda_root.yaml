@@ -1,0 +1,73 @@
+Parameters:
+  AppName:
+    Type: String
+    Description: App name
+    Default: ledger
+
+  Environment:
+    Type: String
+    Description: Environment name
+    Default: dev
+
+  LambdaBucket:
+    Type: String
+    Description: S3 bucket name used by lambda
+    Default: ledger-app-aws-lambda
+
+  LambdaLayerKey:
+    Type: String
+    Description: S3 bucket key used by lambda layer zip
+    Default: ledger_layer.zip
+
+Resources:
+  LambdaRoleStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda_role.yaml
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+
+  LambdaLayerStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda_layer.yaml
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        LambdaBucket: !Ref LambdaBucket
+        LambdaLayerKey: !Ref LambdaLayerKey
+
+  LambdaFunctionStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - LambdaRoleStack
+      - LambdaLayerStack
+    Properties:
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda_function.yaml
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        LambdaBucket: !Ref LambdaBucket
+        LambdaLayerKey: !Ref LambdaLayerKey
