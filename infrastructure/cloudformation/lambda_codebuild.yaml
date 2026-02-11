@@ -181,10 +181,14 @@ Resources:
                 Version: '1'
               Configuration:
                 ProjectName: !Ref CodeBuildProject
-                EnvironmentVariables:
-                  - Name: LambdaBucket
-                    Type: PLAINTEXT
-                    Value: !Ref LambdaBucket
+                EnvironmentVariables: !Sub |
+                  [
+                    {
+                      "name": "LambdaBucket",
+                      "value": "${LambdaBucket}",
+                      "type": "PLAINTEXT"
+                    }
+                  ]
               InputArtifacts:
                 - Name: SourceArtifact
               OutputArtifacts:
