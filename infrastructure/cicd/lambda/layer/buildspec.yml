@@ -14,7 +14,7 @@ phases:
 
       - ZIP_NAME=layer-${CODEBUILD_RESOLVED_SOURCE_VERSION}.zip
       - zip -r ../../$ZIP_NAME python
-      - cd
+      - cd ..
       - pwd
       - ls -lha
 
