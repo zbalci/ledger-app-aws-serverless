@@ -184,7 +184,12 @@ Resources:
                 EnvironmentVariables: !Sub |
                   [
                     {
-                      "name": "LambdaBucket",
+                      "name": "ENVIRONMENT",
+                      "value": "${Environment}",
+                      "type": "PLAINTEXT"
+                    },
+                    {
+                      "name": "LAMBDA_BUCKET",
                       "value": "${LambdaBucket}",
                       "type": "PLAINTEXT"
                     }
