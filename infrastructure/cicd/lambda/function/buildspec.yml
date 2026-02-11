@@ -11,6 +11,7 @@ phases:
       - ZIP_NAME=function-${CODEBUILD_RESOLVED_SOURCE_VERSION}.zip
       - zip -r $ZIP_NAME app config.py lambda_function.py
       - ls -lha
+      - echo "BucketName:$LambdaBucket"
       - aws s3 cp $ZIP_NAME s3://$LambdaBucket/$ENVIRONMENT/$ZIP_NAME
 
 artifacts:
