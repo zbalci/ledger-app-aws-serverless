@@ -7,11 +7,10 @@ phases:
 
   build:
     commands:
-      - |
-        cd src/web
-        ZIP_NAME=function-${CODEBUILD_RESOLVED_SOURCE_VERSION}.zip
-        zip -r ../../$ZIP_NAME app config.py lambda_function.py
-        aws s3 cp $ZIP_NAME s3://my-lambda-artifacts/$ENVIRONMENT/$ZIP_NAME
+      - cd src/web
+      - ZIP_NAME=function-${CODEBUILD_RESOLVED_SOURCE_VERSION}.zip
+      - zip -r ../../$ZIP_NAME app config.py lambda_function.py
+      - aws s3 cp $ZIP_NAME s3://my-lambda-artifacts/$ENVIRONMENT/$ZIP_NAME
 
 artifacts:
   files:
