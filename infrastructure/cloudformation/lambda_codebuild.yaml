@@ -194,4 +194,4 @@ Resources:
                     - !Sub ${SourceBranch}
                 FilePaths:
                   Includes:
-                    - !Sub "^src/${SourceBranchPath}/.*"
+                    - !Sub ${SourceBranchPath}
