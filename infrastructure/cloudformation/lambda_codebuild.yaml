@@ -181,6 +181,10 @@ Resources:
                 Version: '1'
               Configuration:
                 ProjectName: !Ref CodeBuildProject
+                EnvironmentVariables:
+                  - Name: LambdaBucket
+                    Type: PLAINTEXT
+                    Value: !Ref LambdaBucket
               InputArtifacts:
                 - Name: SourceArtifact
               OutputArtifacts:
