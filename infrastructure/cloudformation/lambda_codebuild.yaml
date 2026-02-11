@@ -117,7 +117,15 @@ Resources:
         BuildSpec: infrastructure/cicd/lambda/buildspec.yml
         GitCloneDepth: 0   # Full Clone
       TimeoutInMinutes: 5
-
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PUSH
+            - Type: HEAD_REF
+              Pattern: ^refs/heads/main$
+            - Type: FILE_PATH
+              Pattern: ^src/web/.*
   #     Artifacts:
   #       Type: CODEPIPELINE 
   #     Source:
