@@ -114,7 +114,7 @@ Resources:
           Resource: !Ref GithubConnectionArn
         Type: GITHUB
         Location: !Ref SourceRepoURL
-        BuildSpec: infrastructure/cicd/lambda/buildspec.yml
+        BuildSpec: infrastructure/cicd/lambda/function/buildspec.yml
         GitCloneDepth: 0   # Full Clone
       TimeoutInMinutes: 5
       Triggers:
