@@ -183,6 +183,8 @@ Resources:
                 ProjectName: !Ref CodeBuildProject
               InputArtifacts:
                 - Name: SourceArtifact
+              OutputArtifacts:
+                - Name: OutputArtifact
 
       Triggers:
         - ProviderType: CodeStarSourceConnection
