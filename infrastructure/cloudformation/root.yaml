@@ -20,10 +20,10 @@ Parameters:
     Default: arn:aws:codeconnections:eu-north-1:253712034003:connection/2c02ecd9-b115-4cec-967f-a0e4445ecfaa
     NoEcho: True
 
-  SourceRepoURL:
+  SourceRepo:
     Type: String
-    Description: owner/repo biçiminde GitHub repo URL
-    Default: https://github.com/zbalci/ledger-app-aws-serverless
+    Description: owner/repo biçiminde GitHub repo ID'si
+    Default: zbalci/ledger-app-aws-serverless
 
   SourceBranch:
     Type: String
@@ -55,28 +55,7 @@ Resources:
         Environment: !Ref Environment
         LambdaBucket: !Ref LambdaBucket
         GithubConnectionArn: !Ref GithubConnectionArn
-        SourceRepoURL: !Ref SourceRepoURL
+        SourceRepo: !Ref SourceRepo
         SourceBranch: !Ref SourceBranch
         SourceBranchPath: !FindInMap [LambdaConfig, function, SourceBranchPath]
         BuildPurpose: !FindInMap [LambdaConfig, function, BuildPurpose]
-
-  LambdaLayerBuildStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/lambda_codebuild.yaml
-      Tags:
-        - Key: Application
-          Value: !Ref AppName
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: ManagedBy
-          Value: CloudFormation
-      Parameters:
-        AppName: !Ref AppName
-        Environment: !Ref Environment
-        LambdaBucket: !Ref LambdaBucket
-        GithubConnectionArn: !Ref GithubConnectionArn
-        SourceRepoURL: !Ref SourceRepoURL
-        SourceBranch: !Ref SourceBranch
-        SourceBranchPath: !FindInMap [LambdaConfig, layer, SourceBranchPath]
-        BuildPurpose: !FindInMap [LambdaConfig, layer, BuildPurpose]
