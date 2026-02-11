@@ -23,6 +23,11 @@ Parameters:
     Description: owner/repo biçiminde GitHub repo ID'si
     Default: zbalci/ledger-app-aws-serverless
 
+  SourceRepoURL:
+    Type: String
+    Description: owner/repo biçiminde GitHub repo URL
+    Default: https://github.com/zbalci/ledger-app-aws-serverless
+
   SourceBranch:
     Type: String
     Default: main
@@ -69,6 +74,16 @@ Resources:
                   - s3:PutObject
                 Resource: !Sub "arn:aws:s3:::${LambdaBucket}/*"
 
+              - Sid: GitHubConnectionAccess
+                Effect: Allow
+                Action:
+                  - codestar-connections:UseConnection
+                  - codestar-connections:GetConnectionToken
+                  - codeconnections:UseConnection
+                  - codeconnections:GetConnectionToken
+
+                Resource: "*"
+
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -91,100 +106,113 @@ Resources:
           - Name: ENVIRONMENT
             Value: !Ref Environment
       Artifacts:
-        Type: CODEPIPELINE 
+        Type: S3
+        Location: !Ref LambdaBucket 
       Source:
-        Type: CODEPIPELINE
+        Auth: 
+          Type: CODECONNECTIONS
+          Resource: !Ref GithubConnectionArn
+        Type: GITHUB
+        Location: !Ref SourceRepoURL
         BuildSpec: infrastructure/cicd/lambda/buildspec.yml
         GitCloneDepth: 0   # Full Clone
       TimeoutInMinutes: 5
 
-  ### IAM Role for CodePipeline
-  CodePipelineRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: !Sub ${AppName}-${Environment}-${BuildPurpose}-pipeline-role
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: codepipeline.amazonaws.com
-            Action: sts:AssumeRole
+  #     Artifacts:
+  #       Type: CODEPIPELINE 
+  #     Source:
+  #       Type: CODEPIPELINE
+  #       BuildSpec: infrastructure/cicd/lambda/buildspec.yml
+  #       GitCloneDepth: 0   # Full Clone
+  #     TimeoutInMinutes: 5
 
-  CodePipelinePolicy:
-    Type: AWS::IAM::Policy
-    Properties:
-      PolicyName: !Sub ${AppName}-${Environment}-${BuildPurpose}-pipeline-policy
-      Roles:
-        - !Ref CodePipelineRole
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Sid: AllowS3BucketAccess
-            Effect: Allow
-            Action:
-              - s3:GetBucketVersioning
-              - s3:GetBucketAcl
-              - s3:GetBucketLocation
-            Resource: !Sub "arn:aws:s3:::${LambdaBucket}/*"
+  # ### IAM Role for CodePipeline
+  # CodePipelineRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     RoleName: !Sub ${AppName}-${Environment}-${BuildPurpose}-pipeline-role
+  #     AssumeRolePolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Effect: Allow
+  #           Principal:
+  #             Service: codepipeline.amazonaws.com
+  #           Action: sts:AssumeRole
 
-          - Sid: AllowS3ObjectAccess
-            Effect: Allow
-            Action:
-              - s3:PutObject
-              - s3:PutObjectAcl
-              - s3:GetObject
-              - s3:GetObjectVersion
-            Resource: !Sub "arn:aws:s3:::${LambdaBucket}/*"
+  # CodePipelinePolicy:
+  #   Type: AWS::IAM::Policy
+  #   Properties:
+  #     PolicyName: !Sub ${AppName}-${Environment}-${BuildPurpose}-pipeline-policy
+  #     Roles:
+  #       - !Ref CodePipelineRole
+  #     PolicyDocument:
+  #       Version: "2012-10-17"
+  #       Statement:
+  #         - Sid: AllowS3BucketAccess
+  #           Effect: Allow
+  #           Action:
+  #             - s3:GetBucketVersioning
+  #             - s3:GetBucketAcl
+  #             - s3:GetBucketLocation
+  #           Resource: !Sub "arn:aws:s3:::${LambdaBucket}/*"
 
-          - Effect: Allow
-            Action:
-              - codebuild:BatchGetBuilds
-              - codebuild:StartBuild
-            Resource: !GetAtt CodeBuildProject.Arn
-          - Effect: Allow
-            Action:
-              - codeconnections:UseConnection
-              - codestar-connections:UseConnection
-            Resource:
-              - !Ref GithubConnectionArn
+  #         - Sid: AllowS3ObjectAccess
+  #           Effect: Allow
+  #           Action:
+  #             - s3:PutObject
+  #             - s3:PutObjectAcl
+  #             - s3:GetObject
+  #             - s3:GetObjectVersion
+  #           Resource: !Sub "arn:aws:s3:::${LambdaBucket}/*"
 
-  CodePipeline:
-    Type: AWS::CodePipeline::Pipeline
-    Properties:
-      Name: !Sub "${AppName}-${Environment}-${BuildPurpose}-pipeline"
-      RoleArn: !GetAtt CodePipelineRole.Arn
+  #         - Effect: Allow
+  #           Action:
+  #             - codebuild:BatchGetBuilds
+  #             - codebuild:StartBuild
+  #           Resource: !GetAtt CodeBuildProject.Arn
+  #         - Effect: Allow
+  #           Action:
+  #             - codeconnections:UseConnection
+  #             - codestar-connections:UseConnection
+  #           Resource:
+  #             - !Ref GithubConnectionArn
 
-      ArtifactStore:
-        Type: S3
-        Location: !Ref LambdaBucket
+  # CodePipeline:
+  #   Type: AWS::CodePipeline::Pipeline
+  #   Properties:
+  #     Name: !Sub "${AppName}-${Environment}-${BuildPurpose}-pipeline"
+  #     RoleArn: !GetAtt CodePipelineRole.Arn
 
-      Stages:
-        - Name: Source
-          Actions:
-            - Name: Source
-              ActionTypeId:
-                Category: Source
-                Owner: AWS
-                Provider: CodeStarSourceConnection
-                Version: '1'
-              Configuration:
-                ConnectionArn: !Ref GithubConnectionArn
-                FullRepositoryId: !Ref SourceRepo
-                BranchName: !Ref SourceBranch
-                DetectChanges: true
-              OutputArtifacts:
-                - Name: SourceArtifact
+  #     ArtifactStore:
+  #       Type: S3
+  #       Location: !Ref LambdaBucket
 
-        - Name: Build
-          Actions:
-            - Name: Build
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: '1'
-              Configuration:
-                ProjectName: !Ref CodeBuildProject
-              InputArtifacts:
-                - Name: SourceArtifact
+  #     Stages:
+  #       - Name: Source
+  #         Actions:
+  #           - Name: Source
+  #             ActionTypeId:
+  #               Category: Source
+  #               Owner: AWS
+  #               Provider: CodeStarSourceConnection
+  #               Version: '1'
+  #             Configuration:
+  #               ConnectionArn: !Ref GithubConnectionArn
+  #               FullRepositoryId: !Ref SourceRepo
+  #               BranchName: !Ref SourceBranch
+  #               DetectChanges: true
+  #             OutputArtifacts:
+  #               - Name: SourceArtifact
+
+  #       - Name: Build
+  #         Actions:
+  #           - Name: Build
+  #             ActionTypeId:
+  #               Category: Build
+  #               Owner: AWS
+  #               Provider: CodeBuild
+  #               Version: '1'
+  #             Configuration:
+  #               ProjectName: !Ref CodeBuildProject
+  #             InputArtifacts:
+  #               - Name: SourceArtifact
