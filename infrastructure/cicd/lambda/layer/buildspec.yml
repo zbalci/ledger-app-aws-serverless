@@ -13,6 +13,6 @@ phases:
 
         cd build/layer
         ZIP_NAME=function-${CODEBUILD_RESOLVED_SOURCE_VERSION}.zip
-        zip -r ../../$ZIP_NAME .
+        zip -r ../$ZIP_NAME .
 
         aws s3 cp $ZIP_NAME s3://$LAMBDA_BUCKET/$ENVIRONMENT/layer/$ZIP_NAME

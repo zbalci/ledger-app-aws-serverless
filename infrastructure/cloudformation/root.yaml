@@ -60,7 +60,6 @@ Resources:
         SourceBranchPath: !FindInMap [LambdaConfig, function, SourceBranchPath]
         BuildPurpose: !FindInMap [LambdaConfig, function, BuildPurpose]
 
-Resources:
   LambdaLayerBuildStack:
     Type: AWS::CloudFormation::Stack
     Properties:
