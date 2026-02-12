@@ -212,7 +212,9 @@ Resources:
                 ActionMode: CREATE_UPDATE
                 StackName:
                   Fn::ImportValue: !Sub "${AppName}-${Environment}-lambda-function-name"
-                TemplatePath: SourceArtifact::infrastructure/lambda.yaml
+                TemplatePath: SourceArtifact::infrastructure/cicd/lambda/function/template.yaml
+                RoleArn:
+                  Fn::ImportValue: !Sub "${AppName}-${Environment}-lambda-function-role-name"
                 Capabilities: CAPABILITY_NAMED_IAM
                 ParameterOverrides: !Sub |
                   {

@@ -26,6 +26,13 @@ Resources:
         S3Bucket: !Ref LambdaBucket
         S3Key: !Ref LambdaLayerKey
 
+  LambdaLayerParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${AppName}/${Environment}/lambda/layer"
+      Type: String
+      Value: !GetAtt LambdaLayer.LayerVersionArn
+
 Outputs:
   LambdaLayerName:
     Description: "Ledger lambda layer name"
