@@ -45,4 +45,4 @@ Outputs:
     Description: "Ledger lambda function role Arn"
     Value: !GetAtt LambdaFunctionRole.Arn
     Export:
-      Name: !Sub "${AppName}-${Environment}-lambda-function-role-name"
+      Name: !Sub "${AppName}-${Environment}-lambda-function-execution-role-name"
