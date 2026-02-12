@@ -237,8 +237,7 @@ Resources:
                     "AppName": "${AppName}",
                     "Environment": "${Environment}",
                     "LambdaBucket": "${LambdaBucket}",
-                    "LambdaFunctionKey": "${Environment}/function/function-#{SourceVariables.CommitId}.zip",
-                    "LambdaLayerKey": "ledger_layer.zip"
+                    "LambdaFunctionKey": "${Environment}/function/function-#{SourceVariables.CommitId}.zip"
                   }
               InputArtifacts:
                 - Name: SourceArtifact

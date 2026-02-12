@@ -32,27 +32,27 @@ Resources:
             Version: "2012-10-17"
             Statement:
 
-              # # Lambda create/update
-              # - Effect: Allow
-              #   Action:
-              #     - lambda:CreateFunction
-              #     - lambda:UpdateFunctionCode
-              #     - lambda:UpdateFunctionConfiguration
-              #     - lambda:PublishVersion
-              #     - lambda:DeleteFunction
-              #     - lambda:GetFunction
-              #     - lambda:TagResource
-              #     - lambda:UntagResource
-              #     - lambda:ListVersionsByFunction
-              #   Resource: "*"
+              # Lambda create/update
+              - Effect: Allow
+                Action:
+                  - lambda:CreateFunction
+                  - lambda:UpdateFunctionCode
+                  - lambda:UpdateFunctionConfiguration
+                  - lambda:PublishVersion
+                  - lambda:DeleteFunction
+                  - lambda:GetFunction
+                  - lambda:TagResource
+                  - lambda:UntagResource
+                  - lambda:ListVersionsByFunction
+                Resource: "*"
 
-              # # Layer create/update
-              # - Effect: Allow
-              #   Action:
-              #     - lambda:PublishLayerVersion
-              #     - lambda:DeleteLayerVersion
-              #     - lambda:GetLayerVersion
-              #   Resource: "*"
+              # Layer create/update
+              - Effect: Allow
+                Action:
+                  - lambda:PublishLayerVersion
+                  - lambda:DeleteLayerVersion
+                  - lambda:GetLayerVersion
+                Resource: "*"
 
               # IAM pass role (Lambda execution role için gerekli)
               - Effect: Allow
@@ -76,21 +76,10 @@ Resources:
                 Resource: 
                   - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AppName}/${Environment}/lambda/layer*"
 
-              # - Sid: AllowS3BucketAccess
-              #   Effect: Allow
-              #   Action:
-              #     - s3:GetBucketVersioning
-              #     - s3:GetBucketAcl
-              #     - s3:GetBucketLocation
-              #   Resource: !Sub "arn:aws:s3:::${LambdaBucket}/*"
-
               - Sid: AllowS3ObjectAccess
                 Effect: Allow
                 Action:
-                  # - s3:PutObject
-                  # - s3:PutObjectAcl
                   - s3:GetObject
-                  # - s3:GetObjectVersion
                 Resource: !Sub "arn:aws:s3:::${LambdaBucket}/*"
 
 Outputs:

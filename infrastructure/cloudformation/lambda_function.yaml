@@ -11,11 +11,6 @@ Parameters:
     Type: String
     Description: S3 bucket name used by lambda
 
-  LambdaLayerKey:
-    Type: String
-    Description: S3 bucket key used by lambda layer zip
-    Default: ledger_layer.zip
-
   LambdaFunctionKey:
     Type: String
     Description: S3 bucket key used by lambda function zip
