@@ -14,10 +14,12 @@ Parameters:
   LambdaLayerKey:
     Type: String
     Description: S3 bucket key used by lambda layer zip
+    Default: ledger_layer.zip
 
   LambdaFunctionKey:
     Type: String
     Description: S3 bucket key used by lambda function zip
+    Default: ledger_function.zip
 
 Resources:
   LambdaFunction:

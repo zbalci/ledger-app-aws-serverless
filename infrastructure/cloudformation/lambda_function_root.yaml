@@ -39,7 +39,7 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
-
+        LambdaBucket: !Ref LambdaBucket
   LambdaLayerStack:
     Type: AWS::CloudFormation::Stack
     Properties:
