@@ -40,6 +40,7 @@ Resources:
         AppName: !Ref AppName
         Environment: !Ref Environment
         LambdaBucket: !Ref LambdaBucket
+
   LambdaLayerStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -77,3 +78,10 @@ Resources:
         LambdaBucket: !Ref LambdaBucket
         LambdaLayerKey: !Ref LambdaLayerKey
         LambdaFunctionKey: !Ref LambdaFunctionKey
+
+Outputs:
+  LambdaFunctionStackName:
+    Description: "Lambda stack  name"
+    Value: !Ref LambdaFunctionStack
+    Export:
+      Name: !Sub "${AppName}-${Environment}-lambda-function-stack-name"

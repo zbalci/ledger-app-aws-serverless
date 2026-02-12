@@ -214,6 +214,29 @@ Resources:
                   - logs:PutLogEvents
                 Resource: "*"
 
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameters
+                  - ssm:GetParameter
+                Resource: 
+                  - !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AppName}/${Environment}/lambda/layer*"
+
+              - Sid: AllowS3BucketAccess
+                Effect: Allow
+                Action:
+                  - s3:GetBucketVersioning
+                  - s3:GetBucketAcl
+                  - s3:GetBucketLocation
+                Resource: !Sub "arn:aws:s3:::${LambdaBucket}/*"
+
+              - Sid: AllowS3ObjectAccess
+                Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                Resource: !Sub "arn:aws:s3:::${LambdaBucket}/*"
 
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -280,7 +303,8 @@ Resources:
                 Version: 1
               Configuration:
                 ActionMode: CREATE_UPDATE
-                StackName: !Sub "${AppName}-${Environment}-lambda-function"
+                StackName: 
+                  Fn::ImportValue: !Sub "${AppName}-${Environment}-lambda-function-stack-name"
                 TemplatePath: SourceArtifact::infrastructure/cicd/lambda/function/template.yaml
                 RoleArn: !GetAtt CfnExecutionRole.Arn
                 Capabilities: CAPABILITY_NAMED_IAM
@@ -289,7 +313,8 @@ Resources:
                     "AppName": "${AppName}",
                     "Environment": "${Environment}",
                     "LambdaBucket": "${LambdaBucket}",
-                    "LambdaFunctionKey": "${Environment}/function/function-#{SourceVariables.CommitId}.zip"
+                    "LambdaFunctionKey": "${Environment}/function/function-#{SourceVariables.CommitId}.zip",
+                    "LambdaLayerKey": "ledger_layer.zip"
                   }
               InputArtifacts:
                 - Name: SourceArtifact
