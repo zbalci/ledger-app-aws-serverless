@@ -118,8 +118,7 @@ Resources:
                     "AppName": "${AppName}",
                     "Environment": "${Environment}",
                     "LambdaBucket": "${LambdaBucket}",
-                    "LambdaArtifactKey": "${Environment}/${BuildPurpose}/${BuildPurpose}-#{SourceVariables.CommitId}.zip",
-                    "BuildPurpose": "${BuildPurpose}"
+                    "LambdaArtifactKey": "${Environment}/${BuildPurpose}/${BuildPurpose}-#{SourceVariables.CommitId}.zip"
                   }
               InputArtifacts:
                 - Name: SourceArtifact
