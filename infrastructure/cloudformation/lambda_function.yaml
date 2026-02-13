@@ -11,16 +11,19 @@ Parameters:
     Type: String
     Description: S3 bucket name used by lambda
 
-  LambdaFunctionKey:
+  LambdaArtifactKey:
     Type: String
     Description: S3 bucket key used by lambda function zip
-    Default: ledger_function.zip
+
+  BuildPurpose:
+    Type: String
+    Description: logical purpose of produced artifact
 
 Resources:
   LambdaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub "${AppName}-${Environment}-lambda-function"
+      FunctionName: !Sub "${AppName}-${Environment}-lambda-${BuildPurpose}"
       Runtime: python3.12
       Handler: lambda_function.lambda_handler
       Role:
@@ -29,7 +32,7 @@ Resources:
       Timeout: 300
       Code:
         S3Bucket: !Ref LambdaBucket
-        S3Key: !Ref LambdaFunctionKey
+        S3Key: !Ref LambdaArtifactKey
       Layers:
         - !Sub '{{resolve:ssm:/${AppName}/${Environment}/lambda/layer}}'
 

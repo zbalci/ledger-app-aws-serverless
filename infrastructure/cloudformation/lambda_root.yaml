@@ -14,15 +14,12 @@ Parameters:
     Description: S3 bucket name used by lambda
     Default: ledger-app-aws-lambda
 
-  LambdaLayerKey:
-    Type: String
-    Description: S3 bucket key used by lambda layer zip
-    Default: ledger_layer.zip
-
-  LambdaFunctionKey:
-    Type: String
-    Description: S3 bucket key used by lambda function zip
-    Default: ledger_function.zip
+Mappings:
+  LambdaConfig:
+    layer:
+      LambdaArtifactKey: ledger_layer.zip
+    function:
+      LambdaArtifactKey: ledger_function.zip
 
 Resources:
   LambdaRoleStack:
@@ -56,7 +53,7 @@ Resources:
         AppName: !Ref AppName
         Environment: !Ref Environment
         LambdaBucket: !Ref LambdaBucket
-        LambdaLayerKey: !Ref LambdaLayerKey
+        LambdaArtifactKey: !FindInMap [LambdaConfig, function, LambdaArtifactKey]
 
   LambdaFunctionStack:
     Type: AWS::CloudFormation::Stack
@@ -76,12 +73,17 @@ Resources:
         AppName: !Ref AppName
         Environment: !Ref Environment
         LambdaBucket: !Ref LambdaBucket
-        LambdaLayerKey: !Ref LambdaLayerKey
-        LambdaFunctionKey: !Ref LambdaFunctionKey
+        LambdaArtifactKey: !FindInMap [LambdaConfig, function, LambdaArtifactKey]
 
 Outputs:
   LambdaFunctionStackName:
-    Description: "Lambda stack  name"
+    Description: "Lambda function stack name"
     Value: !Ref LambdaFunctionStack
     Export:
       Name: !Sub "${AppName}-${Environment}-lambda-function-stack-name"
+
+  LambdaLayerStackName:
+    Description: "Lambda layer stack name"
+    Value: !Ref LambdaLayerStack
+    Export:
+      Name: !Sub "${AppName}-${Environment}-lambda-layer-stack-name"
