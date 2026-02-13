@@ -3,6 +3,27 @@ from flask import render_template, session, redirect, url_for, request, send_fro
 from app.main import bp
 from app.connector import get, add, edit, delete, search
 import time
+import logging
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+def lambda_handler(event, context):
+    now = datetime.utcnow()
+    next_month = now + relativedelta(months=1)
+
+    logger.info("Current time: %s", now.isoformat())
+    logger.info("Next month: %s", next_month.isoformat())
+
+    return {
+        "statusCode": 200,
+        "body": {
+            "now": now.isoformat(),
+            "next_month": next_month.isoformat()
+        }
+    }
 
 @bp.route("/")
 def index():

@@ -25,7 +25,7 @@ Resources:
   LambdaRoleStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/lambda_role.yaml
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda_role.yaml
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -41,7 +41,7 @@ Resources:
   LambdaLayerStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/lambda_layer.yaml
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda_layer.yaml
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -61,7 +61,7 @@ Resources:
       - LambdaRoleStack
       - LambdaLayerStack
     Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/lambda_function.yaml
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda_function.yaml
       Tags:
         - Key: Application
           Value: !Ref AppName

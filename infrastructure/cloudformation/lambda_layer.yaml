@@ -15,15 +15,11 @@ Parameters:
     Type: String
     Description: S3 bucket key used by lambda layer zip
 
-  BuildPurpose:
-    Type: String
-    Description: logical purpose of produced artifact
-
 Resources:
   LambdaLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:
-      LayerName: !Sub "${AppName}-${Environment}-lambda-${BuildPurpose}"
+      LayerName: !Sub "${AppName}-${Environment}-lambda-layer"
       CompatibleRuntimes:
         - python3.12
       Content:

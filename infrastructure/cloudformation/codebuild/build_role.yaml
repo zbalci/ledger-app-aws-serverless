@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CodeBuild project for Lambda Pipeline
+
+Parameters:
+  AppName:
+    Type: String
+    Description: App name
+    Default: ledger
+
+  Environment:
+    Type: String
+    Description: Environment name
+
+  GithubConnectionArn:
+    Type: String
+    Description: Github Connection ARN
+    NoEcho: True
+
+  LambdaBucket:
+    Type: String
+    Description: S3 bucket name used by lambda
+
+Resources:
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AppName}-${Environment}-lambda-build-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess
+      Policies:
+        - PolicyName: AdditionalPermissions
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource: !Sub "arn:aws:s3:::${LambdaBucket}/*"
+
+              - Sid: GitHubConnectionAccess
+                Effect: Allow
+                Action:
+                  - codestar-connections:UseConnection
+                  - codestar-connections:GetConnectionToken
+                  - codeconnections:UseConnection
+                  - codeconnections:GetConnectionToken
+                Resource: !Ref GithubConnectionArn
+
+Outputs:
+  CodeBuildRoleArn:
+    Description: "CodeBuild Role Arn"
+    Value: !GetAtt CodeBuildRole.Arn
+    Export:
+      Name: !Sub ${AppName}-${Environment}-lambda-build-role-arn
