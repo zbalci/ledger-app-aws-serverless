@@ -49,7 +49,7 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*"
 
-  LedgerCustomDomain:
+  CustomDomain:
     Type: AWS::ApiGatewayV2::DomainName
     Properties:
       DomainName: ledger.zekibalci.com
@@ -58,9 +58,9 @@ Resources:
           EndpointType: REGIONAL
           SecurityPolicy: TLS_1_2
 
-  LedgerApiMapping:
+  ApiGatewayMapping:
     Type: AWS::ApiGatewayV2::ApiMapping
     Properties:
       ApiId: !Ref ApiGateway
-      DomainName: !Ref LedgerCustomDomain
+      DomainName: !Ref CustomDomain
       Stage: $default

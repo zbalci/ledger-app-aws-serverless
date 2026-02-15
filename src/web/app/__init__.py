@@ -8,7 +8,7 @@ def create_app(config_class=Config):
     app.secret_key = os.urandom(24)  # Use a secure random key in production
 
     app.config.from_object(config_class)
-    app.config['TESTING'] = True
+    app.config['TESTING'] = False
     # Initialize Flask extensions here
 
     #cognito
