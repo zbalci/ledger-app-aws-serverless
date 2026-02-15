@@ -13,7 +13,7 @@ oauth.register(
 
 @bp.route('/login')
 def login():
-    return oauth.oidc.authorize_redirect('https://ledger.zekibalci.com:8443/authorize')
+    return oauth.oidc.authorize_redirect('https://ledger.zekibalci.com/authorize')
 
 @bp.route('/authorize')
 def authorize():
@@ -31,4 +31,4 @@ def authorize():
 @bp.route('/logout')
 def logout():
     session.pop('user', None)
-    return redirect('https://eu-north-1ocupftfb2.auth.eu-north-1.amazoncognito.com/logout?client_id=14nn8j8mt9n5vc8dir9jqb6n77&logout_uri=https://ledger.zekibalci.com:8443/logout')
+    return redirect('https://eu-north-1ocupftfb2.auth.eu-north-1.amazoncognito.com/logout?client_id=14nn8j8mt9n5vc8dir9jqb6n77&logout_uri=https://ledger.zekibalci.com/logout')
