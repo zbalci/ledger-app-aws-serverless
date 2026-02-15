@@ -17,9 +17,9 @@ Parameters:
 Mappings:
   LambdaConfig:
     layer:
-      LambdaArtifactKey: ledger_layer.zip
+      LambdaArtifactKey: dev/layer/layer-7f79476ed7c5d6a210ccd82ea208ab4f929423ca.zip
     function:
-      LambdaArtifactKey: ledger_function.zip
+      LambdaArtifactKey: dev/function/function-7f79476ed7c5d6a210ccd82ea208ab4f929423ca.zip
 
 Resources:
   LambdaExecutionRoleStack:

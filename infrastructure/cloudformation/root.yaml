@@ -46,8 +46,27 @@ Resources:
         Environment: !Ref Environment
         LambdaBucket: !Ref LambdaBucket
 
+  GatewayStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - LambdaStack
+    Properties:
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/api_gateway/api_gateway.yaml
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+
   BuildStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - LambdaStack
     Properties:
       TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/build/root.yaml
       Tags:
@@ -65,6 +84,8 @@ Resources:
 
   PipelineStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - BuildStack
     Properties:
       TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/pipeline/root.yaml
       Tags:
@@ -82,10 +103,12 @@ Resources:
         SourceRepo: !Ref SourceRepo
         SourceBranch: !Ref SourceBranch
 
-  GatewayStack:
+  EventBridgeStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - PipelineStack
     Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/api_gateway/api_gateway.yaml
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/event_bridge/event_bridge.yaml
       Tags:
         - Key: Application
           Value: !Ref AppName
