@@ -1,0 +1,83 @@
+Parameters:
+  AppName:
+    Type: String
+    Description: App name
+    Default: ledger
+
+  Environment:
+    Type: String
+    Description: Environment name
+    Default: dev
+
+  LambdaBucket:
+    Type: String
+    Description: S3 bucket name used by lambda
+    Default: ledger-app-aws-lambda
+
+  GithubConnectionArn:
+    Type: String
+    Description: Github Connection ARN
+    Default: arn:aws:codeconnections:eu-north-1:253712034003:connection/2c02ecd9-b115-4cec-967f-a0e4445ecfaa
+    NoEcho: True
+
+  SourceRepo:
+    Type: String
+    Description: owner/repo biçiminde GitHub repo ID'si
+    Default: zbalci/ledger-app-aws-serverless
+
+  SourceBranch:
+    Type: String
+    Default: main
+  
+Resources:
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/root.yaml
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        LambdaBucket: !Ref LambdaBucket
+
+  BuildStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/build/root.yaml
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        LambdaBucket: !Ref LambdaBucket
+        GithubConnectionArn: !Ref GithubConnectionArn
+
+  PipelineStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/pipeline/root.yaml
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        LambdaBucket: !Ref LambdaBucket
+        GithubConnectionArn: !Ref GithubConnectionArn
+        SourceRepo: !Ref SourceRepo
+        SourceBranch: !Ref SourceBranch
