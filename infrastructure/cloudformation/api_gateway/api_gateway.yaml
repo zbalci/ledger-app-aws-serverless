@@ -36,8 +36,6 @@ Resources:
 
   ApiGatewayStage:
     Type: AWS::ApiGatewayV2::Stage
-    DependsOn:
-      - ApiGatewayMapping
     Properties:
       ApiId: !Ref ApiGateway
       StageName: $default
