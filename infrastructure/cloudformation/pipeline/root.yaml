@@ -9,6 +9,10 @@ Parameters:
     Description: Environment name
     Default: dev
 
+  BaseDomain:
+    Type: String
+    Description: Base Domain name
+
   LambdaBucket:
     Type: String
     Description: S3 bucket name used by lambda
@@ -72,6 +76,7 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
+        BaseDomain: !Ref BaseDomain
         LambdaBucket: !Ref LambdaBucket
         GithubConnectionArn: !Ref GithubConnectionArn
         SourceRepo: !Ref SourceRepo
@@ -95,6 +100,7 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
+        BaseDomain: !Ref BaseDomain
         LambdaBucket: !Ref LambdaBucket
         GithubConnectionArn: !Ref GithubConnectionArn
         SourceRepo: !Ref SourceRepo

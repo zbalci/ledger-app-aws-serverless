@@ -104,6 +104,7 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
+        BaseDomain: !Ref BaseDomain
         LambdaBucket: !Ref LambdaBucket
         GithubConnectionArn: !Ref GithubConnectionArn
         SourceRepo: !Ref SourceRepo

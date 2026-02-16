@@ -11,6 +11,10 @@ Parameters:
     Type: String
     Description: Environment name
 
+  BaseDomain:
+    Type: String
+    Description: Base Domain name
+
   GithubConnectionArn:
     Type: String
     Description: Github Connection ARN
@@ -34,10 +38,6 @@ Parameters:
   LambdaBucket:
     Type: String
     Description: S3 bucket name used by lambda
-
-Conditions:
-  IsFunction: !Equals [ !Ref BuildPurpose, "function" ]
-  IsLayer: !Equals [ !Ref BuildPurpose, "layer" ]
 
 Resources:
   CodePipeline:
@@ -114,7 +114,8 @@ Resources:
                     "AppName": "${AppName}",
                     "Environment": "${Environment}",
                     "LambdaBucket": "${LambdaBucket}",
-                    "LambdaArtifactKey": "${Environment}/${BuildPurpose}/${BuildPurpose}-#{SourceVariables.CommitId}.zip"
+                    "LambdaArtifactKey": "${Environment}/${BuildPurpose}/${BuildPurpose}-#{SourceVariables.CommitId}.zip",
+                    "BaseDomain": "${BaseDomain}"
                   }
               InputArtifacts:
                 - Name: SourceArtifact
