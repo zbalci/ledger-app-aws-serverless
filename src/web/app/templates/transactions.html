@@ -10,7 +10,7 @@
     <div class="container">
         <div class="top-bar">
             <div class="user-info">
-                👤 {{ session["user"]["given_name"] }}
+                👤 {{ session["user"]["name"] }}
             </div>
             <div>
                 <a class="btn btn-sm btn-logout" href="{{ url_for('main.logout') }}">

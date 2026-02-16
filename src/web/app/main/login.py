@@ -38,7 +38,7 @@ def authorize():
     user = token["userinfo"]
 
     session["user"] = {
-        "given_name": user.get("given_name"),
+        "name": user.get("name"),
         "email": user.get("email"),
     }
 

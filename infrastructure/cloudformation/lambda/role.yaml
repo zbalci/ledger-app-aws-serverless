@@ -29,3 +29,14 @@ Resources:
               - Effect: Allow
                 Action: dynamodb:*
                 Resource: "*"
+
+        - PolicyName: LambdaSSMAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:GetParametersByPath
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AppName}/${Environment}/cognito*

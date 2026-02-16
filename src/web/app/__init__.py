@@ -22,7 +22,7 @@ def create_app(config_class=Config):
     def inject_test_user():
         if app.config.get("TESTING"):
             session.setdefault("user", {
-                "given_name": "test-user",
+                "name": "test-user",
                 "email": "test@test.com"
             })
 
