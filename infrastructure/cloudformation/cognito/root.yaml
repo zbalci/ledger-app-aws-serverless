@@ -47,7 +47,7 @@ Resources:
         - !Sub https://${Domain}/authorize
       
       LogoutURLs:
-        - !Sub https://${Domain}/logout
+        - !Sub https://${Domain}
       
       AllowedOAuthFlows:
         - code
