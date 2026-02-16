@@ -9,6 +9,11 @@ Parameters:
     Description: Environment name
     Default: dev
 
+  BaseDomain:
+    Type: String
+    Description: Base Domain name
+    Default: ledger.zekibalci.com
+
   LambdaBucket:
     Type: String
     Description: S3 bucket name used by lambda
@@ -45,6 +50,7 @@ Resources:
         AppName: !Ref AppName
         Environment: !Ref Environment
         LambdaBucket: !Ref LambdaBucket
+        BaseDomain: !Ref BaseDomain
 
   GatewayStack:
     Type: AWS::CloudFormation::Stack

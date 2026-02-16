@@ -12,11 +12,11 @@ class Settings:
 
     def __init__(self):
 
-        self.app_name = os.getenv("APP_NAME", "ledger")
-        self.environment = os.getenv("ENVIRONMENT", "dev")
-        self.region = os.getenv("AWS_REGION", "eu-north-1")
+        self.app_name = os.getenv("APP_NAME")
+        self.environment = os.getenv("ENVIRONMENT")
+        self.region = os.getenv("REGION")
 
-        self.base_domain = os.getenv("BASE_DOMAIN", "ledger.zekibalci.com")
+        self.base_domain = os.getenv("BASE_DOMAIN")
 
         self.cognito_domain_prefix = f"{self.app_name}-{self.environment}"
 
