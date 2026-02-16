@@ -9,21 +9,10 @@ Parameters:
     Description: Environment name
     Default: dev
 
-  BaseDomain:
-    Type: String
-    Description: Base Domain name
-
   LambdaBucket:
     Type: String
     Description: S3 bucket name used by lambda
     Default: ledger-app-aws-lambda
-
-Mappings:
-  LambdaConfig:
-    layer:
-      LambdaArtifactKey: dev/layer/layer-7f79476ed7c5d6a210ccd82ea208ab4f929423ca.zip
-    function:
-      LambdaArtifactKey: dev/function/function-7f79476ed7c5d6a210ccd82ea208ab4f929423ca.zip
 
 Resources:
   LambdaExecutionRoleStack:
@@ -57,56 +46,56 @@ Resources:
         Environment: !Ref Environment
         LambdaBucket: !Ref LambdaBucket
 
-  LambdaLayerStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn:
-      - CFNExecutionRoleStack
-    Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/layer.yaml
-      Tags:
-        - Key: Application
-          Value: !Ref AppName
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: ManagedBy
-          Value: CloudFormation
-      Parameters:
-        AppName: !Ref AppName
-        Environment: !Ref Environment
-        LambdaBucket: !Ref LambdaBucket
-        LambdaArtifactKey: !FindInMap [LambdaConfig, function, LambdaArtifactKey]
+  # LambdaLayerStack:
+  #   Type: AWS::CloudFormation::Stack
+  #   DependsOn:
+  #     - CFNExecutionRoleStack
+  #   Properties:
+  #     TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/layer.yaml
+  #     Tags:
+  #       - Key: Application
+  #         Value: !Ref AppName
+  #       - Key: Environment
+  #         Value: !Ref Environment
+  #       - Key: ManagedBy
+  #         Value: CloudFormation
+  #     Parameters:
+  #       AppName: !Ref AppName
+  #       Environment: !Ref Environment
+  #       LambdaBucket: !Ref LambdaBucket
+  #       LambdaArtifactKey: !FindInMap [LambdaConfig, function, LambdaArtifactKey]
 
-  LambdaFunctionStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn:
-      - LambdaExecutionRoleStack
-      - CFNExecutionRoleStack
-      - LambdaLayerStack
-    Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/function.yaml
-      Tags:
-        - Key: Application
-          Value: !Ref AppName
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: ManagedBy
-          Value: CloudFormation
-      Parameters:
-        AppName: !Ref AppName
-        Environment: !Ref Environment
-        BaseDomain: !Ref BaseDomain
-        LambdaBucket: !Ref LambdaBucket
-        LambdaArtifactKey: !FindInMap [LambdaConfig, function, LambdaArtifactKey]
+  # LambdaFunctionStack:
+  #   Type: AWS::CloudFormation::Stack
+  #   DependsOn:
+  #     - LambdaExecutionRoleStack
+  #     - CFNExecutionRoleStack
+  #     - LambdaLayerStack
+  #   Properties:
+  #     TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/function.yaml
+  #     Tags:
+  #       - Key: Application
+  #         Value: !Ref AppName
+  #       - Key: Environment
+  #         Value: !Ref Environment
+  #       - Key: ManagedBy
+  #         Value: CloudFormation
+  #     Parameters:
+  #       AppName: !Ref AppName
+  #       Environment: !Ref Environment
+  #       BaseDomain: !Ref BaseDomain
+  #       LambdaBucket: !Ref LambdaBucket
+  #       LambdaArtifactKey: !FindInMap [LambdaConfig, function, LambdaArtifactKey]
 
-Outputs:
-  LambdaFunctionStackName:
-    Description: "Lambda function stack name"
-    Value: !Ref LambdaFunctionStack
-    Export:
-      Name: !Sub "${AppName}-${Environment}-lambda-function-stack-name"
+# Outputs:
+#   LambdaFunctionStackName:
+#     Description: "Lambda function stack name"
+#     Value: !Ref LambdaFunctionStack
+#     Export:
+#       Name: !Sub "${AppName}-${Environment}-lambda-function-stack-name"
 
-  LambdaLayerStackName:
-    Description: "Lambda layer stack name"
-    Value: !Ref LambdaLayerStack
-    Export:
-      Name: !Sub "${AppName}-${Environment}-lambda-layer-stack-name"
+#   LambdaLayerStackName:
+#     Description: "Lambda layer stack name"
+#     Value: !Ref LambdaLayerStack
+#     Export:
+#       Name: !Sub "${AppName}-${Environment}-lambda-layer-stack-name"

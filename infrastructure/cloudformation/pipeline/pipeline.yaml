@@ -104,8 +104,7 @@ Resources:
                 Version: 1
               Configuration:
                 ActionMode: CREATE_UPDATE
-                StackName:
-                  Fn::ImportValue: !Sub "${AppName}-${Environment}-lambda-${BuildPurpose}-stack-name"
+                StackName: !Sub "${AppName}-${Environment}-lambda-${BuildPurpose}-stack"
                 TemplatePath: !Sub "SourceArtifact::infrastructure/cloudformation/lambda/${BuildPurpose}.yaml"
                 RoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/${AppName}-${Environment}-cfn-execution-role"
                 Capabilities: CAPABILITY_NAMED_IAM

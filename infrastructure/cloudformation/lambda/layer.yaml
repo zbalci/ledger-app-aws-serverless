@@ -7,6 +7,10 @@ Parameters:
     Type: String
     Description: Environment name
 
+  BaseDomain:
+    Type: String
+    Description: Base Domain name
+
   LambdaBucket:
     Type: String
     Description: S3 bucket name used by lambda
@@ -32,10 +36,3 @@ Resources:
       Name: !Sub "/${AppName}/${Environment}/lambda/layer"
       Type: String
       Value: !GetAtt LambdaLayer.LayerVersionArn
-
-Outputs:
-  LambdaLayerName:
-    Description: "Ledger lambda layer name"
-    Value: !Ref LambdaLayer
-    Export:
-      Name: !Sub "${AppName}-${Environment}-lambda-layer-name"
