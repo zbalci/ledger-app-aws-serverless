@@ -79,6 +79,11 @@ Resources:
                 EnvironmentVariables: !Sub |
                   [
                     {
+                      "name": "APP_NAME",
+                      "value": "${AppName}",
+                      "type": "PLAINTEXT"
+                    },
+                    {
                       "name": "ENVIRONMENT",
                       "value": "${Environment}",
                       "type": "PLAINTEXT"

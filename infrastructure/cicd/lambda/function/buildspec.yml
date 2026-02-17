@@ -7,7 +7,28 @@ phases:
 
   build:
     commands:
-      - cd src/web
-      - ZIP_NAME=function-${CODEBUILD_RESOLVED_SOURCE_VERSION}.zip
-      - zip -r $ZIP_NAME app config.py lambda_function.py
-      - aws s3 cp $ZIP_NAME s3://$LAMBDA_BUCKET/$ENVIRONMENT/function/$ZIP_NAME
+      - |
+        MAX_ATTEMPTS=30   # 5 dk (30 * 10sn)
+        COUNT=0
+
+        until [ "$CURRENT" != "none" ]; do
+          if [ $COUNT -ge $MAX_ATTEMPTS ]; then
+            echo "Layer not ready after timeout"
+            exit 1
+          fi
+
+          echo "Waiting layer version..."
+          sleep 10
+          COUNT=$((COUNT+1))
+
+          CURRENT=$(aws ssm get-parameter \
+            --name "/$APP_NAME/$ENVIRONMENT/lambda/layer" \
+            --query Parameter.Value \
+            --output text 2>/dev/null || echo "none")
+        done
+      
+      - |
+        cd src/web
+        ZIP_NAME=function-${CODEBUILD_RESOLVED_SOURCE_VERSION}.zip
+        zip -r $ZIP_NAME app config.py lambda_function.py
+        aws s3 cp $ZIP_NAME s3://$LAMBDA_BUCKET/$ENVIRONMENT/function/$ZIP_NAME
