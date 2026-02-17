@@ -8,7 +8,14 @@ phases:
   build:
     commands:
       - |
-        MAX_ATTEMPTS=30   # 5 dk (30 * 10sn)
+        PARAM="/$APP_NAME/$ENVIRONMENT/lambda/layer"
+
+        CURRENT=$(aws ssm get-parameter \
+          --name "$PARAM" \
+          --query Parameter.Value \
+          --output text 2>/dev/null || echo "none")
+
+        MAX_ATTEMPTS=30
         COUNT=0
 
         until [ "$CURRENT" != "none" ]; do
@@ -22,10 +29,12 @@ phases:
           COUNT=$((COUNT+1))
 
           CURRENT=$(aws ssm get-parameter \
-            --name "/$APP_NAME/$ENVIRONMENT/lambda/layer" \
+            --name "$PARAM" \
             --query Parameter.Value \
             --output text 2>/dev/null || echo "none")
         done
+
+        echo "Layer ready: $CURRENT"
       
       - |
         cd src/web
