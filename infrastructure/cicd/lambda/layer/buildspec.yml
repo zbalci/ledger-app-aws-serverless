@@ -7,12 +7,32 @@ phases:
 
   build:
     commands:
-      - mkdir -p layer_build/python/lib/python3.12/site-packages
-      - pip install -r src/layers/python/requirements.txt -t layer_build/python/lib/python3.12/site-packages
+      - |
+        mkdir -p layer_build/python/lib/python3.12/site-packages
+        pip install -r src/layers/python/requirements.txt -t layer_build/python/lib/python3.12/site-packages
 
-      - cd layer_build/
-      - ZIP_NAME=layer-${CODEBUILD_RESOLVED_SOURCE_VERSION}.zip
-      - zip -r ../$ZIP_NAME python
-      - cd ..
+        cd layer_build/
+        ZIP_NAME=layer-${CODEBUILD_RESOLVED_SOURCE_VERSION}.zip
+        zip -r ../$ZIP_NAME python
+        cd ..
 
-      - aws s3 cp $ZIP_NAME s3://$LAMBDA_BUCKET/$ENVIRONMENT/layer/$ZIP_NAME
+        aws s3 cp $ZIP_NAME s3://$LAMBDA_BUCKET/$ENVIRONMENT/layer/$ZIP_NAME
+
+      - |
+        FUNCTION_PIPELINE="${APP_NAME}-${ENVIRONMENT}-function-pipeline"
+
+        echo "Checking function pipeline state: $FUNCTION_PIPELINE"
+
+        RUNNING=$(aws codepipeline list-pipeline-executions \
+          --pipeline-name "$FUNCTION_PIPELINE" \
+          --query "pipelineExecutionSummaries[?status=='InProgress'] | length(@)" \
+          --output text)
+
+        if [ "$RUNNING" != "0" ]; then
+          echo "Function pipeline already running. Skip trigger."
+          exit 0
+        fi
+
+        echo "Starting function pipeline..."
+        aws codepipeline start-pipeline-execution \
+          --name "$FUNCTION_PIPELINE"

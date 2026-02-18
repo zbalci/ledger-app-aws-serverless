@@ -44,14 +44,36 @@ Resources:
                   - lambda:TagResource
                   - lambda:UntagResource
                   - lambda:ListVersionsByFunction
-                Resource: "*"
+                  - lambda:RemovePermission
+                  - lambda:AddPermission
+                Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AppName}-${Environment}-lambda-function"
 
-              # Layer create/update
+              # Lambda create/update
               - Effect: Allow
                 Action:
                   - lambda:PublishLayerVersion
                   - lambda:DeleteLayerVersion
                   - lambda:GetLayerVersion
+                Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:${AppName}-${Environment}-lambda-layer*"
+
+              # Lambda API Gateway
+              - Effect: Allow
+                Action:
+                  - apigateway:POST
+                  - apigateway:DELETE
+                Resource: !Sub "arn:aws:apigateway:${AWS::Region}::/restapis/*"
+                Condition:
+                  StringEquals:
+                    aws:ResourceTag/Application: !Ref AppName
+                    aws:ResourceTag/Environment: !Ref Environment
+
+              # Lambda API Gateway
+              - Effect: Allow
+                Action:
+                  - lambda:RemovePermission
+                  - lambda:AddPermission
+                  - apigateway:POST
+                  - apigateway:DELETE
                 Resource: "*"
 
               # IAM pass role (Lambda execution role için gerekli)
