@@ -45,7 +45,7 @@ phases:
 
       # ---------- UPDATE FUNCTION CODE ----------
       - |
-        FUNCTION_NAME="${APP_NAME}-${ENVIRONMENT}-lambda-function"
+        FUNCTION_NAME="$APP_NAME-$ENVIRONMENT-lambda-function"
 
         echo "Updating Lambda function code..."
         aws lambda update-function-code \

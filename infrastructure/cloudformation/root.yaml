@@ -54,6 +54,8 @@ Resources:
 
   GatewayStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - LambdaStack
     Properties:
       TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/api_gateway/api_gateway.yaml
       Tags:
@@ -102,7 +104,6 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
-        BaseDomain: !Ref BaseDomain
         LambdaBucket: !Ref LambdaBucket
         GithubConnectionArn: !Ref GithubConnectionArn
         SourceRepo: !Ref SourceRepo
