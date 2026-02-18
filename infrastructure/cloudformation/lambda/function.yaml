@@ -40,9 +40,22 @@ Resources:
       Layers:
         - !Sub '{{resolve:ssm:/${AppName}/${Environment}/lambda/layer}}'
 
-Outputs:
-  LambdaFunctionArn:
-    Description: "Ledger lambda function arn"
-    Value: !GetAtt LambdaFunction.Arn
-    Export:
-      Name: !Sub "${AppName}-${Environment}-lambda-function-arn"
+  ApiGatewayIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId:
+        Fn::ImportValue: !Sub "${AppName}-${Environment}-api-gateway-arn"
+      IntegrationType: AWS_PROXY
+      IntegrationUri: 
+        !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LedgerLambdaArn}/invocations
+          - LedgerLambdaArn: !GetAtt LambdaFunction.Arn
+      PayloadFormatVersion: "2.0"
+
+  ApiGatewayRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId:
+        Fn::ImportValue: !Sub "${AppName}-${Environment}-api-gateway-arn"
+      RouteKey: "ANY /{proxy+}"
+      Target: !Sub "integrations/${ApiGatewayIntegration}"

@@ -15,24 +15,24 @@ Resources:
       Name: !Sub "${AppName}-${Environment}-api-gateway"
       ProtocolType: HTTP
 
-  ApiGatewayIntegration:
-    Type: AWS::ApiGatewayV2::Integration
-    Properties:
-      ApiId: !Ref ApiGateway
-      IntegrationType: AWS_PROXY
-      IntegrationUri: 
-        !Sub
-          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LedgerLambdaArn}/invocations
-          - LedgerLambdaArn:
-              Fn::ImportValue: !Sub "${AppName}-${Environment}-lambda-function-arn"
-      PayloadFormatVersion: "2.0"
+  # ApiGatewayIntegration:
+  #   Type: AWS::ApiGatewayV2::Integration
+  #   Properties:
+  #     ApiId: !Ref ApiGateway
+  #     IntegrationType: AWS_PROXY
+  #     IntegrationUri: 
+  #       !Sub
+  #         - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LedgerLambdaArn}/invocations
+  #         - LedgerLambdaArn:
+  #             Fn::ImportValue: !Sub "${AppName}-${Environment}-lambda-function-arn"
+  #     PayloadFormatVersion: "2.0"
 
-  ApiGatewayRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref ApiGateway
-      RouteKey: "ANY /{proxy+}"
-      Target: !Sub "integrations/${ApiGatewayIntegration}"
+  # ApiGatewayRoute:
+  #   Type: AWS::ApiGatewayV2::Route
+  #   Properties:
+  #     ApiId: !Ref ApiGateway
+  #     RouteKey: "ANY /{proxy+}"
+  #     Target: !Sub "integrations/${ApiGatewayIntegration}"
 
   ApiGatewayStage:
     Type: AWS::ApiGatewayV2::Stage
@@ -64,3 +64,10 @@ Resources:
       ApiId: !Ref ApiGateway
       DomainName: !Ref CustomDomain
       Stage: $default
+
+Outputs:
+  ApiGatewayArn:
+    Description: "Api Gateway Arn"
+    Value: !Ref ApiGateway
+    Export:
+      Name: !Sub "${AppName}-${Environment}-api-gateway-arn"

@@ -61,6 +61,14 @@ Resources:
                   - codeconnections:GetConnectionToken
                 Resource: !Ref GithubConnectionArn
 
+              - Sid: CodeBuildSSMAccess
+                Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                  - ssm:GetParametersByPath
+                Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AppName}/${Environment}/lambda/layer*
+
 Outputs:
   CodeBuildRoleArn:
     Description: "CodeBuild Role Arn"
