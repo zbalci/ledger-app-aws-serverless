@@ -10,7 +10,7 @@ phases:
 
       # ---------- CHECK LAYER PIPELINE ----------
       - |
-        LAYER_PIPELINE="${APP_NAME}-${ENVIRONMENT}-layer-pipeline"
+        LAYER_PIPELINE="$APP_NAME-$ENVIRONMENT-layer-pipeline"
 
         echo "Checking layer pipeline status: $LAYER_PIPELINE"
 
@@ -33,7 +33,7 @@ phases:
       - |
         cd src/web
 
-        ZIP_NAME=function-${CODEBUILD_RESOLVED_SOURCE_VERSION}.zip
+        ZIP_NAME=function-$CODEBUILD_RESOLVED_SOURCE_VERSION.zip
         S3_KEY="$ENVIRONMENT/function/$ZIP_NAME"
 
         zip -r $ZIP_NAME app config.py lambda_function.py

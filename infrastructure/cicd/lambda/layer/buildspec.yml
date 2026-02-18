@@ -28,7 +28,7 @@ phases:
 
       # ---------- PUBLISH NEW LAYER VERSION ----------
       - |
-        LAYER_NAME="${APP_NAME}-${ENVIRONMENT}-lambda-layer"
+        LAYER_NAME="$APP_NAME-$ENVIRONMENT-lambda-layer"
 
         echo "Publishing new layer version: $LAYER_NAME"
 
@@ -51,7 +51,7 @@ phases:
 
       # ---------- TRIGGER FUNCTION PIPELINE ----------
       - |
-        FUNCTION_PIPELINE="${APP_NAME}-${ENVIRONMENT}-function-pipeline"
+        FUNCTION_PIPELINE="$APP_NAME-$ENVIRONMENT-function-pipeline"
 
         STATUS=$(aws codepipeline list-pipeline-executions \
           --pipeline-name "$FUNCTION_PIPELINE" \
