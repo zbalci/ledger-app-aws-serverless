@@ -29,5 +29,6 @@ phases:
 
       - |
         cd src/web
+        ZIP_NAME=function-${CODEBUILD_RESOLVED_SOURCE_VERSION}.zip
         zip -r $ZIP_NAME app config.py lambda_function.py
-        aws s3 cp $ZIP_NAME s3://$LAMBDA_BUCKET/$S3_KEY
+        aws s3 cp $ZIP_NAME s3://$LAMBDA_BUCKET/$ENVIRONMENT/function/$ZIP_NAME
