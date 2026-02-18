@@ -9,6 +9,10 @@ Parameters:
     Description: Environment name
     Default: dev
 
+  BaseDomain:
+    Type: String
+    Description: Base Domain name
+
   LambdaBucket:
     Type: String
     Description: S3 bucket name used by lambda
@@ -30,10 +34,12 @@ Resources:
         AppName: !Ref AppName
         Environment: !Ref Environment
 
-  CFNExecutionRoleStack:
+  LambdaLayerStack:
     Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - LambdaExecutionRoleStack
     Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/cfn_role.yaml
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/layer.yaml
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -46,56 +52,21 @@ Resources:
         Environment: !Ref Environment
         LambdaBucket: !Ref LambdaBucket
 
-  # LambdaLayerStack:
-  #   Type: AWS::CloudFormation::Stack
-  #   DependsOn:
-  #     - CFNExecutionRoleStack
-  #   Properties:
-  #     TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/layer.yaml
-  #     Tags:
-  #       - Key: Application
-  #         Value: !Ref AppName
-  #       - Key: Environment
-  #         Value: !Ref Environment
-  #       - Key: ManagedBy
-  #         Value: CloudFormation
-  #     Parameters:
-  #       AppName: !Ref AppName
-  #       Environment: !Ref Environment
-  #       LambdaBucket: !Ref LambdaBucket
-  #       LambdaArtifactKey: !FindInMap [LambdaConfig, function, LambdaArtifactKey]
-
-  # LambdaFunctionStack:
-  #   Type: AWS::CloudFormation::Stack
-  #   DependsOn:
-  #     - LambdaExecutionRoleStack
-  #     - CFNExecutionRoleStack
-  #     - LambdaLayerStack
-  #   Properties:
-  #     TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/function.yaml
-  #     Tags:
-  #       - Key: Application
-  #         Value: !Ref AppName
-  #       - Key: Environment
-  #         Value: !Ref Environment
-  #       - Key: ManagedBy
-  #         Value: CloudFormation
-  #     Parameters:
-  #       AppName: !Ref AppName
-  #       Environment: !Ref Environment
-  #       BaseDomain: !Ref BaseDomain
-  #       LambdaBucket: !Ref LambdaBucket
-  #       LambdaArtifactKey: !FindInMap [LambdaConfig, function, LambdaArtifactKey]
-
-# Outputs:
-#   LambdaFunctionStackName:
-#     Description: "Lambda function stack name"
-#     Value: !Ref LambdaFunctionStack
-#     Export:
-#       Name: !Sub "${AppName}-${Environment}-lambda-function-stack-name"
-
-#   LambdaLayerStackName:
-#     Description: "Lambda layer stack name"
-#     Value: !Ref LambdaLayerStack
-#     Export:
-#       Name: !Sub "${AppName}-${Environment}-lambda-layer-stack-name"
+  LambdaFunctionStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - LambdaLayerStack
+    Properties:
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/function.yaml
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        BaseDomain: !Ref BaseDomain
+        LambdaBucket: !Ref LambdaBucket

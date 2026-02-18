@@ -35,6 +35,23 @@ Parameters:
     Default: main
   
 Resources:
+  LambdaStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/root.yaml
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        BaseDomain: !Ref BaseDomain
+        LambdaBucket: !Ref LambdaBucket
+
   GatewayStack:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -50,27 +67,10 @@ Resources:
         AppName: !Ref AppName
         Environment: !Ref Environment
 
-  LambdaRoleStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/root.yaml
-      Tags:
-        - Key: Application
-          Value: !Ref AppName
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: ManagedBy
-          Value: CloudFormation
-      Parameters:
-        AppName: !Ref AppName
-        Environment: !Ref Environment
-        LambdaBucket: !Ref LambdaBucket
-
   BuildStack:
     Type: AWS::CloudFormation::Stack
     DependsOn:
-      - LambdaRoleStack
-      - GatewayStack
+      - LambdaStack
     Properties:
       TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/build/root.yaml
       Tags:
@@ -107,20 +107,3 @@ Resources:
         GithubConnectionArn: !Ref GithubConnectionArn
         SourceRepo: !Ref SourceRepo
         SourceBranch: !Ref SourceBranch
-
-  # EventBridgeStack:
-  #   Type: AWS::CloudFormation::Stack
-  #   DependsOn:
-  #     - PipelineStack
-  #   Properties:
-  #     TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/event_bridge/event_bridge.yaml
-  #     Tags:
-  #       - Key: Application
-  #         Value: !Ref AppName
-  #       - Key: Environment
-  #         Value: !Ref Environment
-  #       - Key: ManagedBy
-  #         Value: CloudFormation
-  #     Parameters:
-  #       AppName: !Ref AppName
-  #       Environment: !Ref Environment

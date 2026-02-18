@@ -7,32 +7,70 @@ phases:
 
   build:
     commands:
+
+      # ---------- BUILD LAYER ----------
       - |
         mkdir -p layer_build/python/lib/python3.12/site-packages
-        pip install -r src/layers/python/requirements.txt -t layer_build/python/lib/python3.12/site-packages
+        pip install -r src/layers/python/requirements.txt \
+          -t layer_build/python/lib/python3.12/site-packages
 
         cd layer_build/
         ZIP_NAME=layer-${CODEBUILD_RESOLVED_SOURCE_VERSION}.zip
         zip -r ../$ZIP_NAME python
         cd ..
 
-        aws s3 cp $ZIP_NAME s3://$LAMBDA_BUCKET/$ENVIRONMENT/layer/$ZIP_NAME
+      # ---------- UPLOAD TO S3 ----------
+      - |
+        S3_KEY="$ENVIRONMENT/layer/$ZIP_NAME"
 
+        aws s3 cp $ZIP_NAME \
+          s3://$LAMBDA_BUCKET/$S3_KEY
+
+      # ---------- PUBLISH NEW LAYER VERSION ----------
+      - |
+        LAYER_NAME="${APP_NAME}-${ENVIRONMENT}-lambda-layer"
+
+        echo "Publishing new layer version: $LAYER_NAME"
+
+        LAYER_ARN=$(aws lambda publish-layer-version \
+          --layer-name "$LAYER_NAME" \
+          --content S3Bucket=$LAMBDA_BUCKET,S3Key=$S3_KEY \
+          --compatible-runtimes python3.12 \
+          --query "LayerVersionArn" \
+          --output text)
+
+        echo "New Layer ARN: $LAYER_ARN"
+
+      # ---------- OPTIONAL: WRITE TO SSM ----------
+      - |
+        aws ssm put-parameter \
+          --name "/$APP_NAME/$ENVIRONMENT/lambda/layer" \
+          --value "$LAYER_ARN" \
+          --type String \
+          --overwrite
+
+      # ---------- TRIGGER FUNCTION PIPELINE ----------
       - |
         FUNCTION_PIPELINE="${APP_NAME}-${ENVIRONMENT}-function-pipeline"
 
-        echo "Checking function pipeline state: $FUNCTION_PIPELINE"
-
-        RUNNING=$(aws codepipeline list-pipeline-executions \
+        STATUS=$(aws codepipeline list-pipeline-executions \
           --pipeline-name "$FUNCTION_PIPELINE" \
-          --query "pipelineExecutionSummaries[?status=='InProgress'] | length(@)" \
+          --max-items 1 \
+          --query "pipelineExecutionSummaries[0].status" \
           --output text)
 
-        if [ "$RUNNING" != "0" ]; then
+        echo "Function pipeline status: $STATUS"
+
+        if [ "$STATUS" = "InProgress" ]; then
           echo "Function pipeline already running. Skip trigger."
           exit 0
         fi
 
         echo "Starting function pipeline..."
-        aws codepipeline start-pipeline-execution \
-          --name "$FUNCTION_PIPELINE"
+
+        EXEC_ID=$(aws codepipeline start-pipeline-execution \
+          --name "$FUNCTION_PIPELINE" \
+          --query "pipelineExecutionId" \
+          --output text)
+
+        echo "Started execution id: $EXEC_ID"

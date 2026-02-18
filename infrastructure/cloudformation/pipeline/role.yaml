@@ -74,19 +74,3 @@ Resources:
               - codeconnections:GetConnectionToken
             Resource:
               - !Ref GithubConnectionArn
-
-          # Cloudformation
-          - Effect: "Allow"
-            Action:
-              - cloudformation:CreateStack
-              - cloudformation:UpdateStack
-              - cloudformation:DescribeStacks
-              - cloudformation:DescribeStackEvents
-              - cloudformation:CreateChangeSet
-              - cloudformation:ExecuteChangeSet
-              - cloudformation:DeleteChangeSet
-            "Resource": "*"
-
-          - Effect: Allow
-            Action: iam:PassRole
-            Resource: !Sub "arn:aws:iam::${AWS::AccountId}:role/${AppName}-${Environment}-cfn-execution-role"
