@@ -5,8 +5,7 @@ from functools import lru_cache
 class Config:
     SESSION_TYPE = 'dynamodb'
     SESSION_DYNAMODB = boto3.resource('dynamodb')
-    SESSION_DYNAMODB_TABLE = 'flask-sessions'
-
+    SESSION_DYNAMODB_TABLE = os.environ.get("SESSION_TABLE_NAME")
 
 class Settings:
 

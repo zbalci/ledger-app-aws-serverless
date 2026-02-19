@@ -25,6 +25,8 @@ Resources:
           ENVIRONMENT: !Ref Environment
           REGION: !Ref AWS::Region
           COGNITO_DOMAIN: !Ref CognitoDomain
+          SESSION_TABLE_NAME: !Sub "${AppName}-${Environment}-dynamodb-flask-sessions"
+          TRANSACTIONS_TABLE_NAME: !Sub "${AppName}-${Environment}-dynamodb-transactions"
       Timeout: 300
       Code:
         ZipFile: |

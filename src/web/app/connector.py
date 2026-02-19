@@ -4,8 +4,12 @@ from boto3.dynamodb.conditions import Key
 
 # DynamoDB bağlantısı
 def connect():
-    dynamodb = boto3.resource('dynamodb', region_name='eu-north-1')  # Bölgeyi güncelleyin
-    table = dynamodb.Table('transactions')  # DynamoDB tablonuzu burada belirtin
+    dynamodb = boto3.resource('dynamodb' )
+
+    table_name = os.environ.get("TRANSACTIONS_TABLE_NAME")
+
+    table = dynamodb.Table(table_name)
+
     return table
 
 # Tüm verileri getirme
@@ -26,7 +30,7 @@ def add(id ,date, amount):
     print(table)
     table.put_item(
         Item={
-            'id': int(id),
+            'id': id,
             'date': date,
             'amount': amount
         }
