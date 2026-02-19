@@ -77,20 +77,31 @@ phases:
         aws lambda wait function-updated \
           --function-name "$FUNCTION_NAME"
 
-
-      # ---------- UPDATE FUNCTION LAYER ----------
+      # ---------- CHECK CURRENT LAYER ----------
       - |
-        echo "Updating Lambda layer configuration..."
-
-        aws lambda update-function-configuration \
+        CURRENT_LAYER=$(aws lambda get-function-configuration \
           --function-name "$FUNCTION_NAME" \
-          --layers "$LAYER_ARN"
+          --query "Layers[0].Arn" \
+          --output text 2>/dev/null || echo "none")
 
-      # ---------- WAIT UNTIL CONFIGURATION UPDATED ----------
-      - |
-        echo "Waiting for Lambda update to complete..."
-        aws lambda wait function-updated \
-          --function-name "$FUNCTION_NAME"
+        echo "Current layer: $CURRENT_LAYER"
+        echo "Target layer:  $LAYER_ARN"
+
+        if [ "$CURRENT_LAYER" != "$LAYER_ARN" ]; then
+
+          echo "Layer changed. Updating configuration..."
+
+          aws lambda update-function-configuration \
+            --function-name "$FUNCTION_NAME" \
+            --layers "$LAYER_ARN"
+
+          echo "Waiting for configuration update..."
+          aws lambda wait function-updated \
+            --function-name "$FUNCTION_NAME"
+
+        else
+          echo "Layer already up to date. Skipping."
+        fi
 
       # ---------- PUBLISH VERSION ----------
       - |
