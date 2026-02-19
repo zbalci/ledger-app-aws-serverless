@@ -15,7 +15,7 @@ def index():
         return redirect(url_for('main.login'))
 
 def generate_id():
-    return str(time.time() * 1000)
+    return int(time.time() * 1000)
 
 # Create operation: Display add transaction form
 @bp.route("/add", methods=["GET", "POST"])
@@ -27,7 +27,7 @@ def add_transaction():
     return render_template("form.html")
 
 # Update operation: Display edit transaction form
-@bp.route("/edit/<transaction_id>", methods=["GET", "POST"])
+@bp.route("/edit/<int:transaction_id>", methods=["GET", "POST"])
 def edit_transaction(transaction_id):
     transactions = get()
     if request.method == 'POST':
@@ -42,7 +42,7 @@ def edit_transaction(transaction_id):
             return render_template("edit.html", transaction=transaction)
 
 # Delete operation: Delete a transaction
-@bp.route("/delete/<transaction_id>")
+@bp.route("/delete/<int:transaction_id>")
 def delete_transaction(transaction_id):
     delete(transaction_id)
     return redirect(url_for("main.index"))
