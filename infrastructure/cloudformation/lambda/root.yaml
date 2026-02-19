@@ -9,9 +9,9 @@ Parameters:
     Description: Environment name
     Default: dev
 
-  BaseDomain:
+  CognitoDomain:
     Type: String
-    Description: Base Domain name
+    Description: Cognito Domain name
 
   LambdaBucket:
     Type: String
@@ -68,4 +68,4 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
-        BaseDomain: !Ref BaseDomain
+        CognitoDomain: !Ref CognitoDomain

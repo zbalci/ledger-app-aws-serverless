@@ -11,7 +11,7 @@ Parameters:
     Description: Environment name
     Default: dev
 
-  Domain: 
+  CognitoDomain: 
     Type: String 
     Default: ledger.zekibalci.com
 
@@ -43,11 +43,11 @@ Resources:
       AllowedOAuthFlowsUserPoolClient: true
       
       CallbackURLs:
-        - !Sub https://${Domain}
-        - !Sub https://${Domain}/authorize
+        - !Sub https://${CognitoDomain}
+        - !Sub https://${CognitoDomain}/authorize
       
       LogoutURLs:
-        - !Sub https://${Domain}
+        - !Sub https://${CognitoDomain}
       
       AllowedOAuthFlows:
         - code
@@ -86,7 +86,7 @@ Resources:
   UserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
     Properties:
-      Domain: !Sub "${AppName}-${Environment}"
+      CognitoDomain: !Sub "${AppName}-${Environment}"
       UserPoolId: !Ref UserPool
 
 Outputs:
@@ -96,5 +96,5 @@ Outputs:
       ?client_id=${UserPoolClient}
       &response_type=code
       &scope=email+openid+profile
-      &redirect_uri=https://${Domain}/authorize
+      &redirect_uri=https://${CognitoDomain}/authorize
     Description: The hosted UI URL

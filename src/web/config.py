@@ -16,7 +16,7 @@ class Settings:
         self.environment = os.getenv("ENVIRONMENT")
         self.region = os.getenv("REGION")
 
-        self.base_domain = os.getenv("BASE_DOMAIN")
+        self.base_domain = os.getenv("COGNITO_DOMAIN")
 
         self.cognito_domain_prefix = f"{self.app_name}-{self.environment}"
 

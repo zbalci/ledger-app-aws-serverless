@@ -7,9 +7,9 @@ Parameters:
     Type: String
     Description: Environment name
 
-  BaseDomain:
+  CognitoDomain:
     Type: String
-    Description: Base Domain name
+    Description: Cognito Domain name
 
 Resources:
   LambdaFunction:
@@ -24,7 +24,7 @@ Resources:
           APP_NAME: !Ref AppName
           ENVIRONMENT: !Ref Environment
           REGION: !Ref AWS::Region
-          BASE_DOMAIN: !Ref BaseDomain
+          COGNITO_DOMAIN: !Ref CognitoDomain
       Timeout: 300
       Code:
         ZipFile: |
