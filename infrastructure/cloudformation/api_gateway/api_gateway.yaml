@@ -63,4 +63,4 @@ Resources:
     Properties:
       ApiId: !Ref ApiGateway
       DomainName: !Ref CustomDomain
-      Stage: $default
+      Stage: !Ref ApiGatewayStage

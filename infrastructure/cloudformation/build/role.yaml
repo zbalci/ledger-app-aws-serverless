@@ -46,15 +46,29 @@ Resources:
                   - logs:PutLogEvents
                 Resource: "*"
 
+              # FUNCTION
               - Effect: Allow
                 Action:
-                  - lambda:PublishVersion
-                  - lambda:UpdateFunctionCode
+                  - lambda:GetFunction
                   - lambda:GetFunctionConfiguration
+                  - lambda:UpdateFunctionCode
                   - lambda:UpdateFunctionConfiguration
+                  - lambda:PublishVersion
+                  - lambda:ListVersionsByFunction
+                  - lambda:DeleteFunction
+                Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:${AppName}-${Environment}*"
+
+
+              # LAYER
+              - Effect: Allow
+                Action:
                   - lambda:PublishLayerVersion
                   - lambda:GetLayerVersion
-                Resource: "*"
+                  - lambda:ListLayerVersions
+                  - lambda:DeleteLayerVersion
+                Resource:
+                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:${AppName}-${Environment}*"
+                  - !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:${AppName}-${Environment}*:*"
 
               - Effect: Allow
                 Action:
@@ -74,9 +88,7 @@ Resources:
               - Sid: CodeBuildSSMAccess
                 Effect: Allow
                 Action:
-                  - ssm:GetParameter
-                  - ssm:GetParameters
-                  - ssm:GetParametersByPath
+                  - ssm:GetParameter*
                   - ssm:PutParameter
                 Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${AppName}/${Environment}/lambda/layer*
 
