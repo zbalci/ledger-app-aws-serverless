@@ -41,7 +41,7 @@ phases:
 
         echo "New Layer ARN: $LAYER_ARN"
 
-      # ---------- OPTIONAL: WRITE TO SSM ----------
+      # ---------- WRITE TO SSM ----------
       - |
         aws ssm put-parameter \
           --name "/$APP_NAME/$ENVIRONMENT/lambda/layer" \

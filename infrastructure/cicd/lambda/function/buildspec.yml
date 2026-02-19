@@ -29,7 +29,22 @@ phases:
           sleep 15
         done
 
-      # ---------- CREATE CODE ZIP FILE ----------
+
+      # ---------- GET LAYER ARN FROM SSM ----------
+      - |
+        PARAM="/$APP_NAME/$ENVIRONMENT/lambda/layer"
+
+        echo "Reading layer ARN from SSM: $PARAM"
+
+        LAYER_ARN=$(aws ssm get-parameter \
+          --name "$PARAM" \
+          --query Parameter.Value \
+          --output text)
+
+        echo "Layer ARN: $LAYER_ARN"
+
+
+      # ---------- CREATE CODE ZIP ----------
       - |
         cd src/web
 
@@ -37,11 +52,13 @@ phases:
         S3_KEY="$ENVIRONMENT/function/$ZIP_NAME"
 
         zip -r $ZIP_NAME app config.py lambda_function.py
-      
+
+
       # ---------- UPLOAD TO S3 ----------
       - |
         echo "Uploading artifact to S3..."
         aws s3 cp $ZIP_NAME s3://$LAMBDA_BUCKET/$S3_KEY
+
 
       # ---------- UPDATE FUNCTION CODE ----------
       - |
@@ -51,5 +68,28 @@ phases:
         aws lambda update-function-code \
           --function-name "$FUNCTION_NAME" \
           --s3-bucket "$LAMBDA_BUCKET" \
-          --s3-key "$S3_KEY" \
-          --publish
+          --s3-key "$S3_KEY"
+
+
+      # ---------- WAIT UNTIL CODE UPDATED ----------
+      - |
+        echo "Waiting for Lambda update to complete..."
+        aws lambda wait function-updated \
+          --function-name "$FUNCTION_NAME"
+
+
+      # ---------- UPDATE FUNCTION LAYER ----------
+      - |
+        echo "Updating Lambda layer configuration..."
+
+        aws lambda update-function-configuration \
+          --function-name "$FUNCTION_NAME" \
+          --layers "$LAYER_ARN"
+
+
+      # ---------- PUBLISH VERSION ----------
+      - |
+        echo "Publishing new version..."
+
+        aws lambda publish-version \
+          --function-name "$FUNCTION_NAME"
