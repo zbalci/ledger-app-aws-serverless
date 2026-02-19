@@ -48,8 +48,12 @@ Resources:
 
               - Effect: Allow
                 Action:
-                  - lambda:PublishLayerVersion
+                  - lambda:PublishVersion
                   - lambda:UpdateFunctionCode
+                  - lambda:GetFunctionConfiguration
+                  - lambda:UpdateFunctionConfiguration
+                  - lambda:PublishLayerVersion
+                  - lambda:GetLayerVersion
                 Resource: "*"
 
               - Effect: Allow

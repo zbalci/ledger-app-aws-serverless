@@ -86,6 +86,11 @@ phases:
           --function-name "$FUNCTION_NAME" \
           --layers "$LAYER_ARN"
 
+      # ---------- WAIT UNTIL CONFIGURATION UPDATED ----------
+      - |
+        echo "Waiting for Lambda update to complete..."
+        aws lambda wait function-updated \
+          --function-name "$FUNCTION_NAME"
 
       # ---------- PUBLISH VERSION ----------
       - |
