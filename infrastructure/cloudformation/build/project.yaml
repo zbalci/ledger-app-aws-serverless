@@ -21,6 +21,11 @@ Resources:
     Properties:
       Name: !Sub "${AppName}-${Environment}-${BuildPurpose}-build-project"
       ServiceRole: !Sub "arn:aws:iam::${AWS::AccountId}:role/${AppName}-${Environment}-lambda-build-role"
+      LogsConfig:
+        CloudWatchLogs:
+          Status: ENABLED
+          GroupName: !Sub "/${AppName}-${Environment}/codebuild"
+          StreamName: !Sub "${BuildPurpose}"
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
         Image: aws/codebuild/standard:7.0

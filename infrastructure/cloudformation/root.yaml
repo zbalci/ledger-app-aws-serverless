@@ -35,10 +35,41 @@ Parameters:
     Default: main
   
 Resources:
+  CognitoStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/${Environment}/artifact_bucket}}/cognito/cognito.yaml'
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        CognitoDomain: !Ref CognitoDomain
+
+  # DynamoDBStack:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub '{{resolve:ssm:/${AppName}/${Environment}/artifact_bucket}}/dynamodb/dynamodb.yaml'
+  #     Tags:
+  #       - Key: Application
+  #         Value: !Ref AppName
+  #       - Key: Environment
+  #         Value: !Ref Environment
+  #       - Key: ManagedBy
+  #         Value: CloudFormation
+  #     Parameters:
+  #       AppName: !Ref AppName
+  #       Environment: !Ref Environment
+
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/root.yaml
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/${Environment}/artifact_bucket}}/lambda/root.yaml'
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -52,59 +83,59 @@ Resources:
         CognitoDomain: !Ref CognitoDomain
         LambdaBucket: !Ref LambdaBucket
 
-  GatewayStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn:
-      - LambdaStack
-    Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/api_gateway/api_gateway.yaml
-      Tags:
-        - Key: Application
-          Value: !Ref AppName
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: ManagedBy
-          Value: CloudFormation
-      Parameters:
-        AppName: !Ref AppName
-        Environment: !Ref Environment
+  # GatewayStack:
+  #   Type: AWS::CloudFormation::Stack
+  #   DependsOn:
+  #     - LambdaStack
+  #   Properties:
+  #     TemplateURL: !Sub '{{resolve:ssm:/${AppName}/${Environment}/artifact_bucket}}/api_gateway/api_gateway.yaml'
+  #     Tags:
+  #       - Key: Application
+  #         Value: !Ref AppName
+  #       - Key: Environment
+  #         Value: !Ref Environment
+  #       - Key: ManagedBy
+  #         Value: CloudFormation
+  #     Parameters:
+  #       AppName: !Ref AppName
+  #       Environment: !Ref Environment
 
-  BuildStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn:
-      - LambdaStack
-    Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/build/root.yaml
-      Tags:
-        - Key: Application
-          Value: !Ref AppName
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: ManagedBy
-          Value: CloudFormation
-      Parameters:
-        AppName: !Ref AppName
-        Environment: !Ref Environment
-        LambdaBucket: !Ref LambdaBucket
-        GithubConnectionArn: !Ref GithubConnectionArn
+  # BuildStack:
+  #   Type: AWS::CloudFormation::Stack
+  #   DependsOn:
+  #     - LambdaStack
+  #   Properties:
+  #     TemplateURL: !Sub '{{resolve:ssm:/${AppName}/${Environment}/artifact_bucket}}/build/root.yaml'
+  #     Tags:
+  #       - Key: Application
+  #         Value: !Ref AppName
+  #       - Key: Environment
+  #         Value: !Ref Environment
+  #       - Key: ManagedBy
+  #         Value: CloudFormation
+  #     Parameters:
+  #       AppName: !Ref AppName
+  #       Environment: !Ref Environment
+  #       LambdaBucket: !Ref LambdaBucket
+  #       GithubConnectionArn: !Ref GithubConnectionArn
 
-  PipelineStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn:
-      - BuildStack
-    Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/pipeline/root.yaml
-      Tags:
-        - Key: Application
-          Value: !Ref AppName
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: ManagedBy
-          Value: CloudFormation
-      Parameters:
-        AppName: !Ref AppName
-        Environment: !Ref Environment
-        LambdaBucket: !Ref LambdaBucket
-        GithubConnectionArn: !Ref GithubConnectionArn
-        SourceRepo: !Ref SourceRepo
-        SourceBranch: !Ref SourceBranch
+  # PipelineStack:
+  #   Type: AWS::CloudFormation::Stack
+  #   DependsOn:
+  #     - BuildStack
+  #   Properties:
+  #     TemplateURL: !Sub '{{resolve:ssm:/${AppName}/${Environment}/artifact_bucket}}/pipeline/root.yaml'
+  #     Tags:
+  #       - Key: Application
+  #         Value: !Ref AppName
+  #       - Key: Environment
+  #         Value: !Ref Environment
+  #       - Key: ManagedBy
+  #         Value: CloudFormation
+  #     Parameters:
+  #       AppName: !Ref AppName
+  #       Environment: !Ref Environment
+  #       LambdaBucket: !Ref LambdaBucket
+  #       GithubConnectionArn: !Ref GithubConnectionArn
+  #       SourceRepo: !Ref SourceRepo
+  #       SourceBranch: !Ref SourceBranch
