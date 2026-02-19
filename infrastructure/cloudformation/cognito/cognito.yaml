@@ -1,0 +1,97 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  AppName:
+    Type: String
+    Description: App name
+
+  Environment:
+    Type: String
+    Description: Environment name
+
+  CognitoDomain: 
+    Type: String 
+
+Resources:
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UsernameConfiguration: 
+        CaseSensitive: false
+      AutoVerifiedAttributes:
+        - email
+      UserPoolName: !Sub ${AppName}-${Environment}-user-pool
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "${AppName}-${Environment}"
+      UserPoolId: !Ref UserPool
+      GenerateSecret: true
+      AllowedOAuthFlowsUserPoolClient: true
+      
+      CallbackURLs:
+        - !Sub https://${CognitoDomain}
+        - !Sub https://${CognitoDomain}/authorize
+      
+      LogoutURLs:
+        - !Sub https://${CognitoDomain}
+      
+      AllowedOAuthFlows:
+        - code
+      
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      
+      SupportedIdentityProviders:
+        - COGNITO
+  
+  CognitoUserPoolIDParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: User Pool ID
+      Name: !Sub "/${AppName}/${Environment}/cognito/user_pool_id"
+      Type: String
+      Value: !Ref UserPool
+
+  CognitoAppClientIDParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: App Client ID
+      Name: !Sub "/${AppName}/${Environment}/cognito/client_id"
+      Type: String
+      Value: !Ref UserPoolClient
+
+  CognitoAppClientSecretParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${AppName}/${Environment}/cognito/client_secret"
+      Type: String
+      Value: !GetAtt UserPoolClient.ClientSecret
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub "${AppName}-${Environment}"
+      UserPoolId: !Ref UserPool
+
+Outputs:
+  HostedUIURL:
+    Value: !Sub >
+      https://${AppName}-${Environment}.auth.${AWS::Region}.amazoncognito.com/login
+      ?client_id=${UserPoolClient}
+      &response_type=code
+      &scope=email+openid+profile
+      &redirect_uri=https://${CognitoDomain}/authorize
+    Description: The hosted UI URL

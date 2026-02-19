@@ -1,0 +1,59 @@
+Parameters:
+  AppName:
+    Type: String
+    Default: ledger
+
+  Environment:
+    Type: String
+    AllowedValues:
+      - prod
+      - dev
+    Default: dev
+
+Resources:
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/${AppName}-${Environment}/lambda"
+      RetentionInDays: 7
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  CodeBuildLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/${AppName}-${Environment}/codebuild"
+      RetentionInDays: 7
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "${AppName}-${Environment}-serverless-artifacts"
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  BucketParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${AppName}/${Environment}/artifact_bucket"
+      Type: String
+      Value: !Sub "https://${ArtifactBucket}.s3.${AWS::Region}.amazonaws.com"
