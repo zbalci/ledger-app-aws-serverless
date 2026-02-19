@@ -4,7 +4,7 @@ from boto3.dynamodb.conditions import Key
 
 # DynamoDB bağlantısı
 def connect():
-    dynamodb = boto3.resource('dynamodb' )
+    dynamodb = boto3.resource('dynamodb')
 
     table_name = os.environ.get("TRANSACTIONS_TABLE_NAME")
 

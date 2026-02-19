@@ -15,7 +15,7 @@ def index():
         return redirect(url_for('main.login'))
 
 def generate_id():
-    return int(time.time() * 1000)
+    return str(time.time() * 1000)
 
 # Create operation: Display add transaction form
 @bp.route("/add", methods=["GET", "POST"])
