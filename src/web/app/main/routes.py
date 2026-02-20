@@ -46,24 +46,3 @@ def edit_transaction(transaction_id):
 def delete_transaction(transaction_id):
     delete(transaction_id)
     return redirect(url_for("main.index"))
-
-# Search operation
-@bp.route("/search", methods=["GET", "POST"])
-def search_transaction():
-    if request.method == 'GET':
-        return render_template("search.html")
-
-    if request.method == 'POST':
-        min_amount = float(request.form['min_amount'])
-        max_amount = float(request.form['max_amount'])
-        filtered_transactions = search(min_amount,max_amount)
-        return render_template("transactions.html", transactions=filtered_transactions)
-
-# Total balance
-@bp.route("/balance")
-def total_balance():
-    balance = 0
-    transactions = get()
-    for transaction in transactions:
-        balance += transaction['amount']
-    return render_template("balance.html", transactions=transactions, balance=balance)
