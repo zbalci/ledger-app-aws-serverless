@@ -1,0 +1,23 @@
+Parameters:
+  AppName:
+    Type: String
+    Description: App name
+    Default: ledger
+
+  RootDomain:
+    Type: String
+    Default: zbalci.com
+
+Resources:
+  DNSStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/global/dns.yaml'
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        RootDomain: !Ref RootDomain

@@ -1,0 +1,61 @@
+Parameters:
+  AppName:
+    Type: String
+    Description: App name
+    Default: ledger
+
+  Environment:
+    Type: String
+    Description: Environment name
+    Default: dev
+
+  RootDomain:
+    Type: String
+    Default: zbalci.com
+
+Resources:
+  LogStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/foundation/logging.yaml'
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+
+  ArtifactBucketStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/foundation/s3-artifacts.yaml'
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+
+  CertificateStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/foundation/acm-certificate.yaml'
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        RootDomain: !Ref RootDomain

@@ -5,7 +5,6 @@ Parameters:
   AppName:
     Type: String
     Description: App name
-    Default: ledger
 
   Environment:
     Type: String
@@ -31,10 +30,6 @@ Parameters:
     Type: String
     Description: logical purpose of produced artifact
 
-  LambdaBucket:
-    Type: String
-    Description: S3 bucket name used by lambda
-
 Resources:
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -43,7 +38,7 @@ Resources:
       RoleArn: !Sub "arn:aws:iam::${AWS::AccountId}:role/${AppName}-${Environment}-lambda-pipeline-role"
       ArtifactStore:
         Type: S3
-        Location: !Ref LambdaBucket
+        Location: !Sub "${AppName}-${Environment}-${AWS::AccountId}-serverless-artifacts"
       Stages:
         - Name: Source
           Actions:
@@ -85,8 +80,8 @@ Resources:
                       "type": "PLAINTEXT"
                     },
                     {
-                      "name": "LAMBDA_BUCKET",
-                      "value": "${LambdaBucket}",
+                      "name": "ARTIFACT_BUCKET",
+                      "value": "${AppName}-${Environment}-${AWS::AccountId}-serverless-artifacts",
                       "type": "PLAINTEXT"
                     }
                   ]

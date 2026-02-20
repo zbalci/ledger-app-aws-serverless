@@ -9,8 +9,8 @@ Parameters:
     Type: String
     Description: Environment name
 
-  CognitoDomain: 
-    Type: String 
+  RootDomain:
+    Type: String
 
 Resources:
   UserPool:
@@ -40,11 +40,11 @@ Resources:
       AllowedOAuthFlowsUserPoolClient: true
       
       CallbackURLs:
-        - !Sub https://${CognitoDomain}
-        - !Sub https://${CognitoDomain}/authorize
+        - !Sub https://${AppName}.${RootDomain}
+        - !Sub https://${AppName}.${RootDomain}/authorize
       
       LogoutURLs:
-        - !Sub https://${CognitoDomain}
+        - !Sub https://${AppName}.${RootDomain}
       
       AllowedOAuthFlows:
         - code
@@ -93,5 +93,5 @@ Outputs:
       ?client_id=${UserPoolClient}
       &response_type=code
       &scope=email+openid+profile
-      &redirect_uri=https://${CognitoDomain}/authorize
+      &redirect_uri=https://${AppName}.${RootDomain}/authorize
     Description: The hosted UI URL

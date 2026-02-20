@@ -57,7 +57,7 @@ phases:
       # ---------- UPLOAD TO S3 ----------
       - |
         echo "Uploading artifact to S3..."
-        aws s3 cp $ZIP_NAME s3://$LAMBDA_BUCKET/$S3_KEY
+        aws s3 cp $ZIP_NAME s3://$ARTIFACT_BUCKET/$S3_KEY
 
 
       # ---------- UPDATE FUNCTION CODE ----------
@@ -67,7 +67,7 @@ phases:
         echo "Updating Lambda function code..."
         aws lambda update-function-code \
           --function-name "$FUNCTION_NAME" \
-          --s3-bucket "$LAMBDA_BUCKET" \
+          --s3-bucket "$ARTIFACT_BUCKET" \
           --s3-key "$S3_KEY"
 
 

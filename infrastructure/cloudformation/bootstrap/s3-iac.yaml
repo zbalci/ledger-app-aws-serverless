@@ -1,0 +1,31 @@
+Parameters:
+  AppName:
+    Type: String
+    Default: ledger
+
+Resources:
+  IaCBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "${AppName}-${AWS::AccountId}-serverless-iac"
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: ManagedBy
+          Value: CloudFormation
+
+  IaCBucketURLParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${AppName}/iac_bucket_url"
+      Type: String
+      Value: !Sub "https://${IaCBucket}.s3.${AWS::Region}.amazonaws.com"
+
+  IaCBucketS3Param:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${AppName}/iac_bucket_s3"
+      Type: String
+      Value: !Sub "s3://${IaCBucket}"

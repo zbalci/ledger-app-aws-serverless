@@ -9,15 +9,10 @@ Parameters:
     Description: Environment name
     Default: dev
 
-  CognitoDomain:
+  RootDomain:
     Type: String
-    Description: Cognito Domain name
-    Default: ledger.zekibalci.com
-
-  LambdaBucket:
-    Type: String
-    Description: S3 bucket name used by lambda
-    Default: ledger-app-aws-lambda
+    Description: Root Domain for Api Gateway
+    Default: zbalci.com
 
   GithubConnectionArn:
     Type: String
@@ -38,7 +33,7 @@ Resources:
   CognitoStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/${Environment}/artifact_bucket}}/cognito/cognito.yaml'
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/cognito/user-pool.yaml'
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -49,12 +44,12 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
-        CognitoDomain: !Ref CognitoDomain
+        RootDomain: !Ref RootDomain
 
   DynamoDBStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/${Environment}/artifact_bucket}}/dynamodb/dynamodb.yaml'
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/dynamodb/tables.yaml'
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -69,7 +64,7 @@ Resources:
   LambdaStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/${Environment}/artifact_bucket}}/lambda/root.yaml'
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/lambda/stack.yaml'
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -80,15 +75,14 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
-        CognitoDomain: !Ref CognitoDomain
-        LambdaBucket: !Ref LambdaBucket
+        RootDomain: !Ref RootDomain
 
   GatewayStack:
     Type: AWS::CloudFormation::Stack
     DependsOn:
       - LambdaStack
     Properties:
-      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/${Environment}/artifact_bucket}}/api_gateway/api_gateway.yaml'
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/api_gateway/http-api.yaml'
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -99,13 +93,14 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
+        RootDomain: !Ref RootDomain
 
   BuildStack:
     Type: AWS::CloudFormation::Stack
     DependsOn:
       - LambdaStack
     Properties:
-      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/${Environment}/artifact_bucket}}/build/root.yaml'
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/build/stack.yaml'
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -116,7 +111,6 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
-        LambdaBucket: !Ref LambdaBucket
         GithubConnectionArn: !Ref GithubConnectionArn
 
   PipelineStack:
@@ -124,7 +118,7 @@ Resources:
     DependsOn:
       - BuildStack
     Properties:
-      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/${Environment}/artifact_bucket}}/pipeline/root.yaml'
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/pipeline/stack.yaml'
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -135,7 +129,6 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
-        LambdaBucket: !Ref LambdaBucket
         GithubConnectionArn: !Ref GithubConnectionArn
         SourceRepo: !Ref SourceRepo
         SourceBranch: !Ref SourceBranch

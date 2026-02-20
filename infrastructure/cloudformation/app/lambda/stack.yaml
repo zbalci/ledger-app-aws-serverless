@@ -2,27 +2,20 @@ Parameters:
   AppName:
     Type: String
     Description: App name
-    Default: ledger
 
   Environment:
     Type: String
     Description: Environment name
-    Default: dev
 
-  CognitoDomain:
+  RootDomain:
     Type: String
     Description: Cognito Domain name
-
-  LambdaBucket:
-    Type: String
-    Description: S3 bucket name used by lambda
-    Default: ledger-app-aws-lambda
 
 Resources:
   LambdaExecutionRoleStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/role.yaml
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/lambda/iam-role.yaml'
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -39,7 +32,7 @@ Resources:
     DependsOn:
       - LambdaExecutionRoleStack
     Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/layer.yaml
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/lambda/lambda-layer.yaml'
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -50,14 +43,13 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
-        LambdaBucket: !Ref LambdaBucket
 
   LambdaFunctionStack:
     Type: AWS::CloudFormation::Stack
     DependsOn:
       - LambdaLayerStack
     Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/lambda/function.yaml
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/lambda/lambda-function.yaml'
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -68,4 +60,4 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
-        CognitoDomain: !Ref CognitoDomain
+        RootDomain: !Ref RootDomain

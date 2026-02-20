@@ -1,0 +1,20 @@
+Parameters:
+  AppName:
+    Type: String
+    Description: App name
+
+  RootDomain:
+    Type: String
+
+Resources:
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Ref RootDomain
+
+Outputs:
+  HostedZoneId:
+    Description: "Hosted Zone"
+    Value: !Ref HostedZone
+    Export:
+      Name: !Sub "${AppName}-hosted-zone-id"

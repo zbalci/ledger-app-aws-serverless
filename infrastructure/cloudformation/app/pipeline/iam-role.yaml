@@ -5,7 +5,6 @@ Parameters:
   AppName:
     Type: String
     Description: App name
-    Default: ledger
 
   Environment:
     Type: String
@@ -15,10 +14,6 @@ Parameters:
     Type: String
     Description: Github Connection ARN
     NoEcho: True
-
-  LambdaBucket:
-    Type: String
-    Description: S3 bucket name used by lambda
 
 Resources:
   ### IAM Role for CodePipeline
@@ -49,7 +44,10 @@ Resources:
               - s3:GetBucketVersioning
               - s3:GetBucketAcl
               - s3:GetBucketLocation
-            Resource: !Sub "arn:aws:s3:::${LambdaBucket}"
+            Resource:
+              Fn::Sub:
+                - "arn:aws:s3:::${ArtifactBucket}"
+                - ArtifactBucket: !Sub "${AppName}-${Environment}-${AWS::AccountId}-serverless-artifacts"
 
           - Sid: AllowS3ObjectAccess
             Effect: Allow
@@ -58,7 +56,10 @@ Resources:
               - s3:PutObjectAcl
               - s3:GetObject
               - s3:GetObjectVersion
-            Resource: !Sub "arn:aws:s3:::${LambdaBucket}/*"
+            Resource:
+              Fn::Sub:
+                - "arn:aws:s3:::${ArtifactBucket}/*"
+                - ArtifactBucket: !Sub "${AppName}-${Environment}-${AWS::AccountId}-serverless-artifacts"
 
           - Effect: Allow
             Action:

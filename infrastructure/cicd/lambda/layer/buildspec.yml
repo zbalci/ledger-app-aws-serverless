@@ -24,7 +24,7 @@ phases:
         S3_KEY="$ENVIRONMENT/layer/$ZIP_NAME"
 
         aws s3 cp $ZIP_NAME \
-          s3://$LAMBDA_BUCKET/$S3_KEY
+          s3://$ARTIFACT_BUCKET/$S3_KEY
 
       # ---------- PUBLISH NEW LAYER VERSION ----------
       - |
@@ -34,7 +34,7 @@ phases:
 
         LAYER_ARN=$(aws lambda publish-layer-version \
           --layer-name "$LAYER_NAME" \
-          --content S3Bucket=$LAMBDA_BUCKET,S3Key=$S3_KEY \
+          --content S3Bucket=$ARTIFACT_BUCKET,S3Key=$S3_KEY \
           --compatible-runtimes python3.12 \
           --query "LayerVersionArn" \
           --output text)

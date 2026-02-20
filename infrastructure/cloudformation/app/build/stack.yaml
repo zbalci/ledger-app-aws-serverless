@@ -1,0 +1,75 @@
+Parameters:
+  AppName:
+    Type: String
+    Description: App name
+
+  Environment:
+    Type: String
+    Description: Environment name
+
+  GithubConnectionArn:
+    Type: String
+    Description: Github Connection ARN
+    NoEcho: True
+
+Mappings:
+  LambdaConfig:
+    layer:
+      BuildPurpose: layer
+      SourceBranchPath: layers
+    function:
+      BuildPurpose: function
+      SourceBranchPath: web
+
+Resources:
+  BuildRoleStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/build/iam-role.yaml'
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        GithubConnectionArn: !Ref GithubConnectionArn
+
+  FunctionBuildProjectStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - BuildRoleStack
+    Properties:
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/build/project.yaml'
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        BuildPurpose: !FindInMap [LambdaConfig, function, BuildPurpose]
+
+  LayerBuildProjectStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - BuildRoleStack
+    Properties:
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/build/project.yaml'
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        BuildPurpose: !FindInMap [LambdaConfig, layer, BuildPurpose]

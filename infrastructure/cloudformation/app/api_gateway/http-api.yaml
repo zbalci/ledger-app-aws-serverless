@@ -2,11 +2,14 @@ Parameters:
   AppName:
     Type: String
     Description: App name
-    Default: ledger
+
   Environment:
     Type: String
     Description: Environment name
-    Default: dev
+
+  RootDomain:
+    Type: String
+    Description: Root Domain for Api Gateway
 
 Resources:
   ApiGateway:
@@ -52,9 +55,10 @@ Resources:
   CustomDomain:
     Type: AWS::ApiGatewayV2::DomainName
     Properties:
-      DomainName: ledger.zekibalci.com
+      DomainName: !Sub "${AppName}-${Environment}.${RootDomain}"
       DomainNameConfigurations:
-        - CertificateArn: arn:aws:acm:eu-north-1:253712034003:certificate/b50ea7e2-db47-4fab-b762-59c688a549d0
+        - CertificateArn:
+            Fn::ImportValue: !Sub "${AppName}-${Environment}-cert-arn"
           EndpointType: REGIONAL
           SecurityPolicy: TLS_1_2
 
@@ -64,3 +68,18 @@ Resources:
       ApiId: !Ref ApiGateway
       DomainName: !Ref CustomDomain
       Stage: !Ref ApiGatewayStage
+
+  CustomDomainRecord:
+    Type: AWS::Route53::RecordSet
+    DependsOn: 
+      - CustomDomain
+    Properties:
+      HostedZoneId:
+        Fn::ImportValue: !Sub "${AppName}-hosted-zone-id"
+
+      Name: !Sub "${AppName}-${Environment}.${RootDomain}"
+      Type: A
+
+      AliasTarget:
+        DNSName: !GetAtt CustomDomain.RegionalDomainName
+        HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId

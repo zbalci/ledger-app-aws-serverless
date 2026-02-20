@@ -2,23 +2,22 @@ Parameters:
   AppName:
     Type: String
     Description: App name
-    Default: ledger
 
   Environment:
     Type: String
     Description: Environment name
-    Default: dev
-
-  LambdaBucket:
-    Type: String
-    Description: S3 bucket name used by lambda
-    Default: ledger-app-aws-lambda
 
   GithubConnectionArn:
     Type: String
     Description: Github Connection ARN
-    Default: arn:aws:codeconnections:eu-north-1:253712034003:connection/2c02ecd9-b115-4cec-967f-a0e4445ecfaa
     NoEcho: True
+
+  SourceRepo:
+    Type: String
+    Description: owner/repo biçiminde GitHub repo ID'si
+
+  SourceBranch:
+    Type: String
 
 Mappings:
   LambdaConfig:
@@ -30,10 +29,10 @@ Mappings:
       SourceBranchPath: web
 
 Resources:
-  BuildRoleStack:
+  PipelineRoleStack:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/build/role.yaml
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/pipeline/iam-role.yaml'
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -45,14 +44,13 @@ Resources:
         AppName: !Ref AppName
         Environment: !Ref Environment
         GithubConnectionArn: !Ref GithubConnectionArn
-        LambdaBucket: !Ref LambdaBucket
 
-  FunctionBuildProjectStack:
+  LayerPipelineStack:
     Type: AWS::CloudFormation::Stack
     DependsOn:
-      - BuildRoleStack
+      - PipelineRoleStack
     Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/build/project.yaml
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/pipeline/pipeline.yaml'
       Tags:
         - Key: Application
           Value: !Ref AppName
@@ -63,22 +61,30 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         Environment: !Ref Environment
-        BuildPurpose: !FindInMap [LambdaConfig, function, BuildPurpose]
-
-  LayerBuildProjectStack:
-    Type: AWS::CloudFormation::Stack
-    DependsOn:
-      - BuildRoleStack
-    Properties:
-      TemplateURL: https://ledger-app-aws-iac.s3.eu-north-1.amazonaws.com/build/project.yaml
-      Tags:
-        - Key: Application
-          Value: !Ref AppName
-        - Key: Environment
-          Value: !Ref Environment
-        - Key: ManagedBy
-          Value: CloudFormation
-      Parameters:
-        AppName: !Ref AppName
-        Environment: !Ref Environment
+        GithubConnectionArn: !Ref GithubConnectionArn
+        SourceRepo: !Ref SourceRepo
+        SourceBranch: !Ref SourceBranch
+        SourceBranchPath: !FindInMap [LambdaConfig, layer, SourceBranchPath]
         BuildPurpose: !FindInMap [LambdaConfig, layer, BuildPurpose]
+
+  FunctionPipelineStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - LayerPipelineStack
+    Properties:
+      TemplateURL: !Sub '{{resolve:ssm:/${AppName}/iac_bucket_url}}/app/pipeline/pipeline.yaml'
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
+      Parameters:
+        AppName: !Ref AppName
+        Environment: !Ref Environment
+        GithubConnectionArn: !Ref GithubConnectionArn
+        SourceRepo: !Ref SourceRepo
+        SourceBranch: !Ref SourceBranch
+        SourceBranchPath: !FindInMap [LambdaConfig, function, SourceBranchPath]
+        BuildPurpose: !FindInMap [LambdaConfig, function, BuildPurpose]

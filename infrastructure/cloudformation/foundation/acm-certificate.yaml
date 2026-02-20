@@ -1,0 +1,31 @@
+Parameters:
+  AppName:
+    Type: String
+    Description: App name
+    Default: ledger
+
+  Environment:
+    Type: String
+    Description: Environment name
+    Default: dev
+
+  RootDomain:
+    Type: String
+    Default: zekibalci.com
+
+Resources:
+  Certificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Sub "${AppName}-${Environment}.${RootDomain}"
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Sub "${AppName}-${Environment}.${RootDomain}"
+          HostedZoneId:
+            Fn::ImportValue: !Sub "${AppName}-hosted-zone-id"
+
+Outputs:
+  CertificateArn:
+    Value: !Ref Certificate
+    Export:
+      Name: !Sub "${AppName}-${Environment}-cert-arn"

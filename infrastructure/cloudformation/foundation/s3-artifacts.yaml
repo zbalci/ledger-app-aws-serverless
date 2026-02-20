@@ -1,0 +1,21 @@
+Parameters:
+  AppName:
+    Type: String
+
+  Environment:
+    Type: String
+
+Resources:
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "${AppName}-${Environment}-${AWS::AccountId}-serverless-artifacts"
+      Tags:
+        - Key: Application
+          Value: !Ref AppName
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: ManagedBy
+          Value: CloudFormation
