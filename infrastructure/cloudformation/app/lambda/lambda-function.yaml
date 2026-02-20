@@ -26,7 +26,7 @@ Resources:
           APP_NAME: !Ref AppName
           ENVIRONMENT: !Ref Environment
           REGION: !Ref AWS::Region
-          COGNITO_DOMAIN: !Sub "${AppName}.${RootDomain}"
+          COGNITO_DOMAIN: !Sub "${AppName}-${Environment}.${RootDomain}"
           SESSION_TABLE_NAME: !Sub "${AppName}-${Environment}-dynamodb-flask-sessions"
           TRANSACTIONS_TABLE_NAME: !Sub "${AppName}-${Environment}-dynamodb-transactions"
       Timeout: 300
