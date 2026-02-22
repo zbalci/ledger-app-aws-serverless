@@ -1,5 +1,5 @@
-Flask==2.2.5
-Werkzeug==3.0.3
+flask
+werkzeug
 unittest2
 beautifulsoup4
 authlib

@@ -4,6 +4,25 @@ phases:
   install:
     runtime-versions:
       python: 3.12
+  install:
+    commands:
+      - echo Installing security tools...
+
+      # Bandit
+      - pip install bandit
+
+      # Trivy
+      - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+      - mv ./bin/trivy /usr/local/bin/trivy
+
+  pre_build:
+    commands:
+      - echo "Running Python security scan (Bandit)..."
+      - bandit -r src/web/app -lll || echo "Bandit warnings detected"
+
+      # ---------- REPO SECURITY SCAN ----------
+      - echo "Running Trivy repo vulnerability scan..."
+      - trivy repo --severity CRITICAL,HIGH --exit-code 1 ./
 
   build:
     commands:
