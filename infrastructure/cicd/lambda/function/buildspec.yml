@@ -18,11 +18,11 @@ phases:
     commands:
       # ---------- STATIC ANALYSIS ----------
       - echo "Running Python security scan (Bandit)..."
-      - bandit -r src/web/app -lll -ii || echo "Bandit warnings detected"
+      - bandit -r src/web/ -lll -ii || echo "Bandit warnings detected"
 
       # ---------- REPO SECURITY SCAN ----------
       - echo "Running Trivy repo vulnerability scan..."
-      - trivy fs --scanners vuln,secret,misconfig --severity CRITICAL,HIGH --exit-code 1 .
+      - trivy fs --scanners vuln,secret,misconfig --severity CRITICAL,HIGH --exit-code 1 src/web/
 
   build:
     commands:
