@@ -71,15 +71,11 @@ Resources:
 
   CustomDomainRecord:
     Type: AWS::Route53::RecordSet
-    DependsOn: 
-      - CustomDomain
     Properties:
       HostedZoneId:
         Fn::ImportValue: !Sub "${AppName}-hosted-zone-id"
-
       Name: !Sub "${AppName}-${Environment}.${RootDomain}"
       Type: A
-
       AliasTarget:
         DNSName: !GetAtt CustomDomain.RegionalDomainName
         HostedZoneId: !GetAtt CustomDomain.RegionalHostedZoneId
