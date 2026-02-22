@@ -10,6 +10,11 @@ Resources:
     UpdateReplacePolicy: Retain
     Properties:
       BucketName: !Sub "${AppName}-${AWS::AccountId}-serverless-iac"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+        IgnorePublicAcls: true
       Tags:
         - Key: Application
           Value: !Ref AppName
