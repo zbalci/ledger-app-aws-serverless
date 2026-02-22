@@ -83,7 +83,7 @@ phases:
 
       - |
         SBOM_PREFIX="sbom/$ENVIRONMENT/layer/$CODEBUILD_RESOLVED_SOURCE_VERSION"
-        cyclonedx-py -r src/layers/python/requirements.txt -o sbom.json
+        cyclonedx-py requirements src/layers/python/requirements.txt -o sbom.json
         aws s3 cp sbom.json s3://$ARTIFACT_BUCKET/$SBOM_PREFIX/sbom.json
 
       - |
