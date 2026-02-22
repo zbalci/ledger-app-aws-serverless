@@ -4,7 +4,6 @@ phases:
   install:
     runtime-versions:
       python: 3.12
-  install:
     commands:
       - echo Installing security tools...
 
@@ -17,12 +16,13 @@ phases:
 
   pre_build:
     commands:
+      # ---------- STATIC ANALYSIS ----------
       - echo "Running Python security scan (Bandit)..."
-      - bandit -r src/web/app -lll || echo "Bandit warnings detected"
+      - bandit -r src/web/app -lll -ii || echo "Bandit warnings detected"
 
       # ---------- REPO SECURITY SCAN ----------
       - echo "Running Trivy repo vulnerability scan..."
-      - trivy repo --severity CRITICAL,HIGH --exit-code 1 ./
+      - trivy fs --scanners vuln,secret,misconfig --severity CRITICAL,HIGH --exit-code 1 .
 
   build:
     commands:
@@ -70,8 +70,8 @@ phases:
         ZIP_NAME=function-$CODEBUILD_RESOLVED_SOURCE_VERSION.zip
         S3_KEY="$ENVIRONMENT/function/$ZIP_NAME"
 
-        zip -r $ZIP_NAME app config.py lambda_function.py
-
+        zip -r $ZIP_NAME app config.py lambda_function.py \
+          -x "*.pyc" "*__pycache__*" "*.pytest_cache*"
 
       # ---------- UPLOAD TO S3 ----------
       - |
@@ -83,12 +83,17 @@ phases:
       - |
         FUNCTION_NAME="$APP_NAME-$ENVIRONMENT-lambda-function"
 
+        REVISION=$(aws lambda get-function \
+          --function-name "$FUNCTION_NAME" \
+          --query 'Configuration.RevisionId' \
+          --output text)
+
         echo "Updating Lambda function code..."
         aws lambda update-function-code \
           --function-name "$FUNCTION_NAME" \
           --s3-bucket "$ARTIFACT_BUCKET" \
-          --s3-key "$S3_KEY"
-
+          --s3-key "$S3_KEY" \
+          --revision-id "$REVISION"
 
       # ---------- WAIT UNTIL CODE UPDATED ----------
       - |

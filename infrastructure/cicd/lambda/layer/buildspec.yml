@@ -4,6 +4,22 @@ phases:
   install:
     runtime-versions:
       python: 3.12
+    commands:
+      - pip install --upgrade pip
+
+      - echo Installing security tools...
+
+      # Pip-audit and SBOM
+      - pip install pip-audit cyclonedx-bom
+
+      # Trivy
+      - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+      - mv ./bin/trivy /usr/local/bin/trivy
+
+  pre_build:
+    commands:
+    -  echo "Running dependency vulnerability scan..."
+    -  pip-audit -r src/layers/python/requirements.txt --strict
 
   build:
     commands:
@@ -14,11 +30,25 @@ phases:
         pip install -r src/layers/python/requirements.txt \
           -t layer_build/python/lib/python3.12/site-packages
 
+      - | 
+        PYTHONPATH=layer_build/python/lib/python3.12/site-packages pip check
+
+      - |
         cd layer_build/
         ZIP_NAME=layer-$CODEBUILD_RESOLVED_SOURCE_VERSION.zip
         zip -r ../$ZIP_NAME python
         cd ..
 
+  post_build:
+    commands:
+      # ---------- TRIVY SCAN ----------
+      - |
+        echo "Running Trivy scan on built layer..."
+        trivy fs --scanners vuln,secret,misconfig \
+          --severity CRITICAL,HIGH \
+          --exit-code 1 layer_build/
+
+    finally:
       # ---------- UPLOAD TO S3 ----------
       - |
         S3_KEY="$ENVIRONMENT/layer/$ZIP_NAME"
@@ -48,6 +78,28 @@ phases:
           --value "$LAYER_ARN" \
           --type String \
           --overwrite
+
+      # ---------- SBOM ----------
+
+      - |
+        SBOM_PREFIX="sbom/$ENVIRONMENT/layer/$CODEBUILD_RESOLVED_SOURCE_VERSION"
+        cyclonedx-py -r src/layers/python/requirements.txt -o sbom.json
+        aws s3 cp sbom.json s3://$ARTIFACT_BUCKET/$SBOM_PREFIX/sbom.json
+
+      - |
+        cat <<EOF > metadata.json
+        {
+          "app": "$APP_NAME",
+          "environment": "$ENVIRONMENT",
+          "layer_name": "$LAYER_NAME",
+          "layer_arn": "$LAYER_ARN",
+          "commit": "$CODEBUILD_RESOLVED_SOURCE_VERSION",
+          "build_id": "$CODEBUILD_BUILD_ID",
+          "build_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        }
+        EOF
+
+        aws s3 cp metadata.json s3://$ARTIFACT_BUCKET/$SBOM_PREFIX/metadata.json
 
       # ---------- TRIGGER FUNCTION PIPELINE ----------
       - |
