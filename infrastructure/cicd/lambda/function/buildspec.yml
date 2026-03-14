@@ -16,6 +16,11 @@ phases:
 
   pre_build:
     commands:
+      # ---------- RUN INTEGRATION TESTS ----------
+      - |
+      - echo "Running integraton tests..."
+        python -m unittest discover -s tests -t src/web/
+
       # ---------- STATIC ANALYSIS ----------
       - echo "Running Python security scan (Bandit)..."
       - bandit -r src/web/ -lll -ii || echo "Bandit warnings detected"
@@ -23,12 +28,6 @@ phases:
       # ---------- APP SECURITY SCAN ----------
       - echo "Running Trivy repo vulnerability scan..."
       - trivy fs --scanners vuln,secret,misconfig --severity CRITICAL,HIGH --exit-code 1 src/web/
-
-
-      # ---------- RUN INTEGRATION TESTS ----------
-      - |
-      - echo "Running integraton tests..."
-        python -m unittest discover -s tests -t src/web/
 
   build:
     commands:
