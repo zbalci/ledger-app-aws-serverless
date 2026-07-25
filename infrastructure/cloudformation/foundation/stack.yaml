@@ -2,16 +2,13 @@ Parameters:
   AppName:
     Type: String
     Description: App name
-    Default: ledger
 
   Environment:
     Type: String
     Description: Environment name
-    Default: dev
 
   RootDomain:
     Type: String
-    Default: zbalci.com
 
 Resources:
   LogStack:

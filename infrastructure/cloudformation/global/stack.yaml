@@ -2,11 +2,9 @@ Parameters:
   AppName:
     Type: String
     Description: App name
-    Default: ledger
 
   RootDomain:
     Type: String
-    Default: zbalci.com
 
 Resources:
   DNSStack:

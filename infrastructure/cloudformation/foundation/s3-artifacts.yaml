@@ -19,3 +19,10 @@ Resources:
           Value: !Ref Environment
         - Key: ManagedBy
           Value: CloudFormation
+
+  ArtifactBucketParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub "/${AppName}/artifact_bucket_s3"
+      Type: String
+      Value: !Sub "s3://${ArtifactBucket}"

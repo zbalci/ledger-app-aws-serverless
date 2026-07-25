@@ -1,7 +1,6 @@
 Parameters:
   AppName:
     Type: String
-    Default: ledger
 
 Resources:
   IaCBucket:
