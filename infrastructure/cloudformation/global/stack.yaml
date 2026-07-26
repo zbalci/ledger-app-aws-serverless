@@ -19,3 +19,7 @@ Resources:
       Parameters:
         AppName: !Ref AppName
         RootDomain: !Ref RootDomain
+
+Outputs:
+  HostedZoneId:
+    Value: !GetAtt DNSStack.Outputs.HostedZoneId

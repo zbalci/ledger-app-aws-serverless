@@ -56,27 +56,137 @@ trap 'error "Deployment failed on line $LINENO."' ERR
 # Clone repo function
 ########################################
 
-# clone_repository() {
+clone_repository() {
 
-#     if [[ ! -d "$REPOSITORY_DIR" ]]; then
+    #
+    # Already inside a Git repository
+    #
+    if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 
-#         info "Cloning repository..."
+        local REPO_ROOT
+        local REPO_URL
 
-#         git clone "$REPOSITORY_URL"
+        REPO_ROOT=$(git rev-parse --show-toplevel)
+        REPO_URL=$(git config --get remote.origin.url)
 
-#         success "Repository cloned."
+        if [[ "$REPO_URL" != "$REPOSITORY_URL" ]]; then
 
-#     else
+            error "Current directory belongs to a different Git repository."
+            error "Repository : $REPO_URL"
+            error "Expected   : $REPOSITORY_URL"
+            exit 1
 
-#         warn "Repository already exists."
+        fi
 
-#     fi
+        info "Using existing repository."
 
-#     cd "$REPOSITORY_DIR"
-# }
+        cd "$REPO_ROOT"
+
+        return
+
+    fi
+
+    #
+    # Repository exists in current directory
+    #
+    if [[ -d "$REPOSITORY_DIR/.git" ]]; then
+
+        info "Using existing repository."
+
+        cd "$REPOSITORY_DIR"
+
+        return
+
+    fi
+
+    #
+    # Clone repository
+    #
+    info "Cloning repository..."
+
+    git clone "$REPOSITORY_URL"
+
+    cd "$REPOSITORY_DIR"
+
+    success "Repository cloned."
+
+}
 
 ########################################
-# Deploy stack Function
+# Sync templates function
+########################################
+
+sync_templates() {
+
+    if $DRY_RUN; then
+        info "[PLAN] Upload CloudFormation templates"
+        return
+    fi
+
+    local IAC_S3_URL
+
+    IAC_S3_URL=$(get_ssm_parameter "/${APP_NAME}/iac_bucket_s3")
+
+    info "Uploading CloudFormation templates..."
+
+    aws s3 sync \
+        infrastructure/cloudformation \
+        "$IAC_S3_URL"
+
+    success "Templates uploaded."
+}
+
+########################################
+# Show nameserver function
+########################################
+
+show_nameservers() {
+
+    if $DRY_RUN; then
+        info "[PLAN] Would display Route53 Name Server records."
+        return
+    fi
+
+    local HOSTED_ZONE_ID
+    local NAME_SERVERS
+
+    HOSTED_ZONE_ID=$(aws cloudformation describe-stacks \
+        --stack-name "${APP_NAME}-global" \
+        --query "Stacks[0].Outputs[?OutputKey=='HostedZoneId'].OutputValue" \
+        --output text \
+        --region "$AWS_REGION")
+
+    NAME_SERVERS=$(aws route53 get-hosted-zone \
+        --id "$HOSTED_ZONE_ID" \
+        --query "DelegationSet.NameServers[]" \
+        --output text \
+        --region "$AWS_REGION")
+
+    echo
+    echo "=========================================================="
+    echo " DNS Configuration Required"
+    echo "=========================================================="
+    echo
+    echo "Domain:"
+    echo "  ${ROOT_DOMAIN}"
+    echo
+    echo "Update the NS records at your domain registrar:"
+    echo
+
+    for ns in $NAME_SERVERS; do
+        echo "  • $ns"
+    done
+
+    echo
+    echo "After updating the records, DNS propagation may"
+    echo "take a few minutes."
+    echo
+    read -rp "Press ENTER to continue..."
+    echo
+}
+
+########################################
+# Deploy stack function
 ########################################
 
 deploy_stack() {
@@ -86,6 +196,14 @@ deploy_stack() {
 
     shift 2
 
+    #
+    # Eğer kullanıcı "global", "foundation" veya "app"
+    # gibi bir klasör adı verdiyse TemplateURL oluştur.
+    #
+    if [[ "$TEMPLATE" != *.yaml ]]; then
+        TEMPLATE="$(get_ssm_parameter "/${APP_NAME}/iac_bucket_url")/${TEMPLATE}/stack.yaml"
+    fi
+
     local TEMPLATE_OPTION
 
     if [[ "$TEMPLATE" =~ ^https?:// ]]; then
@@ -93,6 +211,13 @@ deploy_stack() {
     else
         TEMPLATE_OPTION="--template-body"
         TEMPLATE="file://${TEMPLATE}"
+    fi
+
+    if $DRY_RUN; then
+        info "[PLAN] Would deploy stack: ${STACK_NAME}"
+        info "[PLAN] Template: ${TEMPLATE}"
+        info "[PLAN] Parameters: $*"
+        return 0
     fi
 
     info "Deploying stack: ${STACK_NAME}"
@@ -117,7 +242,6 @@ deploy_stack() {
 
             if [[ "$UPDATE_OUTPUT" == *"No updates are to be performed."* ]]; then
                 info "No changes detected."
-
             else
                 error "Update failed."
                 echo "$UPDATE_OUTPUT"
@@ -160,6 +284,24 @@ deploy_stack() {
 
 get_ssm_parameter() {
 
+    if $DRY_RUN; then
+        case "$1" in
+            "/${APP_NAME}/iac_bucket_s3")
+                echo "s3://dummy-iac-bucket"
+                ;;
+            "/${APP_NAME}/iac_bucket_url")
+                echo "https://dummy-iac-bucket.s3.amazonaws.com"
+                ;;
+            "/${APP_NAME}/artifact_bucket_s3")
+                echo "s3://dummy-artifact-bucket"
+                ;;
+            *)
+                echo "<unknown>"
+                ;;
+        esac
+        return 0
+    fi
+
     aws ssm get-parameter \
         --name "$1" \
         --query "Parameter.Value" \
@@ -173,7 +315,13 @@ get_ssm_parameter() {
 
 build_layer() {
 
-    info "Building Lambda layer..."
+    if $DRY_RUN; then
+        info "[PLAN] Skipping layer build."
+        return
+    else
+        info "Building Lambda layer..."
+
+    fi
 
     bash scripts/build-layer.sh
 
@@ -197,8 +345,9 @@ Usage:
     ./deploy.sh [option]
 
 Options
+    --help             Show this help (default)
 
-    --all              Deploy everything (default)
+    --all              Deploy everything 
 
     --bootstrap-only   Deploy bootstrap stack
 
@@ -212,56 +361,57 @@ Options
 
     --dry-run          Print actions without executing
 
-    --help             Show this help
+Examples:
+    ./deploy.sh --all
+    ./deploy.sh --all --dry-run
+    ./deploy.sh --app-only
+    ./deploy.sh --app-only --skip-layer
 
 EOF
 
 }
 
+SHOW_HELP=true
+
+DEPLOY_BOOTSTRAP=false
+DEPLOY_GLOBAL=false
+DEPLOY_FOUNDATION=false
+DEPLOY_APP=false
+BUILD_LAYER_ENABLED=false
 
 DRY_RUN=false
-
-run() {
-
-    if $DRY_RUN; then
-        echo "[DRY RUN] $*"
-    else
-        "$@"
-    fi
-
-}
-
-DEPLOY_BOOTSTRAP=true
-DEPLOY_GLOBAL=true
-DEPLOY_FOUNDATION=true
-DEPLOY_APP=true
-BUILD_LAYER_ENABLED=true
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
 
+        --all)
+            SHOW_HELP=false
+            DEPLOY_BOOTSTRAP=true
+            DEPLOY_GLOBAL=true
+            DEPLOY_FOUNDATION=true
+            DEPLOY_APP=true
+            BUILD_LAYER_ENABLED=true
+            ;;
+
         --bootstrap-only)
-            DEPLOY_GLOBAL=false
-            DEPLOY_FOUNDATION=false
-            DEPLOY_APP=false
+            SHOW_HELP=false
+            DEPLOY_BOOTSTRAP=true
             ;;
 
         --global-only)
-            DEPLOY_BOOTSTRAP=false
-            DEPLOY_FOUNDATION=false
-            DEPLOY_APP=false
+            SHOW_HELP=false
+            DEPLOY_GLOBAL=true
             ;;
 
         --foundation-only)
-            DEPLOY_BOOTSTRAP=false
-            DEPLOY_GLOBAL=false
-            DEPLOY_APP=false
+            SHOW_HELP=false
+            DEPLOY_FOUNDATION=true
             ;;
 
         --app-only)
-            DEPLOY_BOOTSTRAP=false
-            DEPLOY_GLOBAL=false
-            DEPLOY_FOUNDATION=false
+            SHOW_HELP=false
+            DEPLOY_APP=true
+            BUILD_LAYER_ENABLED=true
             ;;
 
         --skip-layer)
@@ -279,6 +429,7 @@ while [[ $# -gt 0 ]]; do
 
         *)
             echo "Unknown option: $1"
+            echo
             usage
             exit 1
             ;;
@@ -288,40 +439,52 @@ while [[ $# -gt 0 ]]; do
     shift
 done
 
+if $SHOW_HELP; then
+    usage
+    exit 0
+fi
+
 main() {
 
-    # clone_repository
+    clone_repository
 
     if $DEPLOY_BOOTSTRAP; then
-
         deploy_stack \
             "${APP_NAME}-bootstrap" \
             infrastructure/cloudformation/bootstrap/s3-iac.yaml \
             --parameters \
                 ParameterKey=AppName,ParameterValue="$APP_NAME"
-
     fi
 
-    IAC_S3_URL=$(get_ssm_parameter "/${APP_NAME}/iac_bucket_s3")
-    IAC_HTTP_URL=$(get_ssm_parameter "/${APP_NAME}/iac_bucket_url")
+    #
+    # Global/Foundation/App için template'leri yükle
+    #
+    if $DEPLOY_GLOBAL || \
+       $DEPLOY_FOUNDATION || \
+       $DEPLOY_APP; then
 
-    run aws s3 sync infrastructure/cloudformation "$IAC_S3_URL"
+        sync_templates
+
+    fi
 
     if $DEPLOY_GLOBAL; then
 
         deploy_stack \
             "${APP_NAME}-global" \
-            "${IAC_HTTP_URL}/global/stack.yaml" \
+            global \
             --parameters \
                 ParameterKey=AppName,ParameterValue="$APP_NAME" \
                 ParameterKey=RootDomain,ParameterValue="$ROOT_DOMAIN"
+        
+        show_nameservers
+
     fi
 
     if $DEPLOY_FOUNDATION; then
 
         deploy_stack \
             "${APP_NAME}-foundation" \
-            "${IAC_HTTP_URL}/foundation/stack.yaml" \
+            foundation \
             --parameters \
                 ParameterKey=AppName,ParameterValue="$APP_NAME" \
                 ParameterKey=Environment,ParameterValue="$ENVIRONMENT" \
@@ -338,7 +501,7 @@ main() {
 
         deploy_stack \
             "${APP_NAME}-app" \
-            "${IAC_HTTP_URL}/app/stack.yaml" \
+            app \
             --disable-rollback \
             --parameters \
                 ParameterKey=AppName,ParameterValue="$APP_NAME" \
@@ -349,8 +512,14 @@ main() {
                 ParameterKey=SourceBranch,ParameterValue="$SOURCE_BRANCH"
     fi
 
-    echo
-    success "Deployment completed successfully."
+
+    if $DRY_RUN; then
+        info "[PLAN] Dry-run completed."
+        return
+    else
+        echo
+        success "Deployment completed successfully."
+    fi
 
 }
 
