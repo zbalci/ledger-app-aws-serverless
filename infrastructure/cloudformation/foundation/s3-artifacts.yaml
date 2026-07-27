@@ -8,7 +8,7 @@ Parameters:
 Resources:
   ArtifactBucket:
     Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
+    DeletionPolicy: Delete
     UpdateReplacePolicy: Retain
     Properties:
       BucketName: !Sub "${AppName}-${Environment}-${AWS::AccountId}-serverless-artifacts"
