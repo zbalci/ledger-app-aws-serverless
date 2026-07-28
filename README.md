@@ -120,7 +120,7 @@ The infrastructure is organized into **two logical layers**: Foundation and Root
 
 ### Summary
 
-This project is designed as a **realistic AWS ECS portfolio**:
+This project is designed as a **realistic AWS Serverless portfolio**:
 
 * Modular CloudFormation design
 * Environment‑aware deployments
