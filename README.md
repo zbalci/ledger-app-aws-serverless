@@ -165,6 +165,19 @@ Preview the deployment:
 
 The infrastructure can be removed using the companion destroy script.
 
+## Examples
+
+Destroy the entire infrastructure:
+
+```bash
+./destory.sh --all
+```
+Dry-run for destroy:
+
+```bash
+./destroy.sh --all --dry-run
+```
+
 Resources are deleted in reverse dependency order to avoid CloudFormation failures.
 
 During cleanup the script automatically:
