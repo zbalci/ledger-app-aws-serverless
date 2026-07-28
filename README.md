@@ -83,6 +83,41 @@ The deployment separates shared infrastructure from application-specific resourc
 
 ---
 
+## Prerequisites
+
+Before deploying the project, ensure the following requirements are met:
+
+- AWS CLI v2
+- An AWS account with sufficient permissions
+- Git
+- Bash (Linux or macOS)
+- Python 3.x (if required for Lambda packaging)
+
+---
+
+## Quick Start
+
+Clone the repository:
+
+```bash
+git clone https://github.com/zbalci/ledger-app-aws-serverless.git
+cd ledger-app-aws-serverless
+```
+
+Deploy the complete infrastructure:
+
+```bash
+./scripts/deploy.sh --all
+```
+
+Destroy all deployed resources:
+
+```bash
+./scripts/destroy.sh
+```
+
+---
+
 ## Deployment Workflow
 
 The entire infrastructure can be provisioned using a single deployment script.
@@ -211,40 +246,6 @@ flowchart TD
 
 The repository separates infrastructure, application code, and deployment automation to keep the project modular and easy to maintain.
 
----
-
-## Prerequisites
-
-Before deploying the project, ensure the following requirements are met:
-
-- AWS CLI v2
-- An AWS account with sufficient permissions
-- Git
-- Bash (Linux or macOS)
-- Python 3.x (if required for Lambda packaging)
-
----
-
-## Quick Start
-
-Clone the repository:
-
-```bash
-git clone https://github.com/zbalci/ledger-app-aws-serverless.git
-cd ledger-app-aws-serverless
-```
-
-Deploy the complete infrastructure:
-
-```bash
-./scripts/deploy.sh --all
-```
-
-Destroy all deployed resources:
-
-```bash
-./scripts/destroy.sh
-```
 ---
 
 ## Continuous Integration and Deployment
