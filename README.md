@@ -2,19 +2,36 @@
 
 A production-style serverless application deployed entirely on AWS using Infrastructure as Code (CloudFormation). The project demonstrates a complete deployment workflow built around AWS Lambda, API Gateway, Cognito, DynamoDB, Route 53, ACM, CodePipeline, and CodeBuild.
 
-The infrastructure is organized into modular nested CloudFormation stacks and can be provisioned or destroyed using a single deployment script. The project focuses on automation, repeatability, and maintainability, making it suitable as a reference implementation for modern serverless deployments.
+The infrastructure is organized into modular nested CloudFormation stacks and can be provisioned or destroyed using a single deployment script. The project focuses on automation, repeatability, and maintainability, making it a reference implementation for modern AWS serverless deployments.
 
 ![Ledger App](docs/diagrams/01-ledger-app.png)
 
+---
+
+## Highlights
+
+- Fully serverless architecture built on AWS managed services
+- Infrastructure as Code with modular nested CloudFormation stacks
+- One-command deployment and cleanup
+- Partial deployment support and dry-run mode
+- Custom domain provisioning with Route 53 and ACM
+- Amazon Cognito authentication
+- REST API powered by API Gateway and AWS Lambda
+- DynamoDB persistence
+- Shared Lambda Layer for dependency management
+- AWS-native CI/CD using GitHub, CodePipeline, and CodeBuild
+
+---
+
 ## Prerequisites
 
-Before deploying the project, ensure the following requirements are met:
+Before deploying the project, ensure you have:
 
 - AWS CLI v2
 - An AWS account with sufficient permissions
 - Git
 - Bash (Linux or macOS)
-- Python 3.x (if required for Lambda packaging)
+- Python 3.x (required for Lambda packaging)
 
 ---
 
@@ -26,7 +43,22 @@ Clone the repository:
 git clone https://github.com/zbalci/ledger-app-aws-serverless.git
 cd ledger-app-aws-serverless
 ```
-### Repository Structure
+
+Deploy the complete infrastructure:
+
+```bash
+./scripts/deploy.sh --all
+```
+
+To remove all deployed resources:
+
+```bash
+./scripts/destroy.sh --all
+```
+
+---
+
+## Repository Structure
 
 ```text
 .
@@ -35,19 +67,37 @@ cd ledger-app-aws-serverless
 │   ├── global/
 │   ├── foundation/
 │   └── application/
-│
 ├── lambda/
 │   ├── layer/
 │   └── functions/
-│
 ├── scripts/
-│
-├── deploy.sh
-├── destroy.sh
+│   ├── deploy.sh
+│   └── destroy.sh
 └── README.md
 ```
 
-### Deployment
+---
+
+## Architecture
+
+The application follows a fully serverless architecture where authentication, API processing, and data persistence are provided entirely by managed AWS services.
+
+Infrastructure is separated into four logical CloudFormation layers, allowing independent updates, reusable components, and clean dependency management.
+
+![CloudFormation Stacks](docs/diagrams/02-cfn-stacks.png)
+
+| Stack | Responsibility |
+|--------|----------------|
+| **Bootstrap** | Creates deployment buckets and shared parameters required by the deployment process. |
+| **Global** | Deploys Route 53, ACM certificates, and shared DNS resources. |
+| **Foundation** | Deploys Cognito, DynamoDB, IAM resources, and the shared Lambda Layer. |
+| **Application** | Deploys Lambda functions, API Gateway, custom domain mapping, and application resources. |
+
+![App Flow](docs/diagrams/05-app-flow.png)
+
+---
+
+## Deployment
 
 Deploy the complete infrastructure:
 
@@ -55,165 +105,54 @@ Deploy the complete infrastructure:
 ./scripts/deploy.sh --all
 ```
 
-Destroy all deployed resources:
-
-```bash
-./scripts/destroy.sh
-```
-
----
-
-## Highlights
-
-- Fully serverless architecture built on AWS managed services
-- Modular nested CloudFormation stacks
-- One-command deployment and cleanup
-- Automated custom domain configuration with Route 53 and ACM
-- Secure authentication using Amazon Cognito
-- REST API powered by API Gateway and AWS Lambda
-- DynamoDB for scalable NoSQL data storage
-- CI/CD pipeline using GitHub, CodePipeline and CodeBuild
-- Shared Lambda Layer for dependency management
-- Parameter Store integration for configuration sharing
-
-## Architecture
-
-The application follows a fully serverless architecture where authentication, API processing, and data persistence are provided entirely by managed AWS services.
-
-The deployment separates shared infrastructure from application-specific resources through multiple CloudFormation stacks. This approach improves maintainability, enables independent updates, and simplifies environment provisioning.
-
-![CloudFormation Stacks](docs/diagrams/02-cfn-stacks.png)
-
-## Key Features
-
-### Infrastructure
-
-- Infrastructure as Code using nested CloudFormation stacks
-- Modular stack organization
-- Automated stack dependency management
-- Environment-specific configuration
-- Shared resources isolated from application resources
-
-### Deployment
-
-- Single-command deployment
-- Partial deployment support
-- Dry-run mode
-- Automatic template synchronization
-- Bootstrap resource provisioning
-
-### Application
-
-- JWT authentication with Amazon Cognito
-- REST API using API Gateway
-- Stateless Lambda functions
-- Shared Lambda Layer
-- DynamoDB persistence
-
-![App Flow](docs/diagrams/05-app-flow.png)
-
-### CI/CD
-
-- GitHub integration
-- Automated CloudFormation deployments
-- Automated Lambda packaging
-- Continuous delivery through CodePipeline
-
-![Pipeline Flow](docs/diagrams/03-pipeline-flow.png)
-
-<p align="center"> <img width="700" height="295" src="docs/diagrams/04-build-detail.png"> </p>
-
----
-
-## Deployment Workflow
-
-The entire infrastructure can be provisioned using a single deployment script.
-
 The deployment script supports both full and partial deployments.
 
 | Option | Description |
 |---------|-------------|
 | `--all` | Deploy the complete infrastructure |
 | `--bootstrap-only` | Deploy only the bootstrap stack |
-| `--global-only` | Deploy only shared global resources |
+| `--global-only` | Deploy only shared resources |
 | `--foundation-only` | Deploy only the foundation layer |
 | `--app-only` | Deploy only the application stack |
 | `--skip-layer` | Skip Lambda Layer deployment |
-| `--dry-run` | Print commands without executing them |
+| `--dry-run` | Preview commands without executing them |
 | `--help` | Display available options |
 
-## Examples
-
-Deploy the entire infrastructure:
+### Examples
 
 ```bash
-./deploy.sh --all
+# Deploy only shared infrastructure
+./scripts/deploy.sh --global-only
+
+# Deploy only the application
+./scripts/deploy.sh --app-only
+
+# Preview the deployment
+./scripts/deploy.sh --all --dry-run
 ```
 
-Deploy only shared infrastructure:
+---
+
+## Destroy
+
+Destroy the complete infrastructure:
 
 ```bash
-./deploy.sh --global-only
+./scripts/destroy.sh --all
 ```
 
-Deploy only the application:
+Preview the destroy process:
 
 ```bash
-./deploy.sh --app-only
+./scripts/destroy.sh --all --dry-run
 ```
 
-Preview the deployment:
+Resources are removed in reverse dependency order. During cleanup the script also:
 
-```bash
-./deploy.sh --all --dry-run
-```
-
-## Destroy Workflow
-
-The infrastructure can be removed using the companion destroy script.
-
-## Examples
-
-Destroy the entire infrastructure:
-
-```bash
-./destory.sh --all
-```
-Dry-run for destroy:
-
-```bash
-./destroy.sh --all --dry-run
-```
-
-Resources are deleted in reverse dependency order to avoid CloudFormation failures.
-
-During cleanup the script automatically:
-
-- Deletes application resources first
-- Removes shared infrastructure
-- Empties S3 buckets when required
-- Deletes the bootstrap resources
+- Empties deployment buckets
 - Removes deployment artifacts
-- Cleans up SSM parameters created during deployment
-- Removes Route 53 validation and alias records to enable hosted zone deletion
-
----
-
-## CloudFormation Stack Organization
-
-The infrastructure is organized into multiple nested CloudFormation stacks. Each layer has a well-defined responsibility and depends only on the resources it requires.
-
-| Stack | Responsibility |
-|--------|----------------|
-| **Bootstrap** | Creates deployment buckets and shared parameters required for the deployment process. |
-| **Global** | Deploys shared infrastructure such as Route 53, ACM certificates, and DNS configuration. |
-| **Foundation** | Deploys shared application services including Cognito, DynamoDB, IAM resources, and the Lambda Layer. |
-| **Application** | Deploys Lambda functions, API Gateway, custom domain mapping, and application-specific resources. |
-
----
-
-
-The repository separates infrastructure, application code, and deployment automation to keep the project modular and easy to maintain.
+- Cleans up SSM parameters
+- Removes Route 53 validation and alias records when required to enable hosted zone deletion
 
 ---
 
@@ -224,25 +163,27 @@ The project includes an AWS-native CI/CD pipeline built with CodePipeline and Co
 The pipeline automatically:
 
 - Retrieves the latest source code from GitHub
-- Builds and packages Lambda functions
+- Packages Lambda functions
 - Uploads deployment artifacts
 - Updates CloudFormation stacks
 - Deploys the latest application version
 
+![Pipeline Flow](docs/diagrams/03-pipeline-flow.png)
+
+<p align="center">
+  <img width="700" src="docs/diagrams/04-build-detail.png">
+</p>
+
 ---
 
-### Summary
+## Summary
 
-This project is designed as a **realistic AWS Serverless portfolio**:
+This project demonstrates a production-style AWS serverless deployment featuring:
 
-* Modular CloudFormation design
-* Environment‑aware deployments
-* Production‑grade CI/CD patterns
-* Clean separation of concerns
+- Modular CloudFormation architecture
+- Environment-aware infrastructure
+- Automated deployment and teardown
+- AWS-native CI/CD
+- Clear separation between infrastructure and application code
 
-It aims to reflect how serverless systems are typically structured in real‑world environments rather than minimal demos.
-
-* Keeps application logic simple and auditable
-* Emphasizes reproducibility, security, and clarity
-
-It is not a framework or a product, but a **reference implementation** for serverless delivery pipelines.
+Rather than being a framework or a production application, it serves as a reference implementation that showcases automation, maintainability, and real-world serverless deployment practices.
