@@ -168,7 +168,98 @@ During cleanup the script automatically:
 
 ---
 
+## CloudFormation Stack Organization
 
+The infrastructure is organized into multiple nested CloudFormation stacks. Each layer has a well-defined responsibility and depends only on the resources it requires.
+
+```mermaid
+flowchart TD
+    A[Bootstrap] --> B[Global]
+    B --> C[Foundation]
+    C --> D[Application]
+```
+
+| Stack | Responsibility |
+|--------|----------------|
+| **Bootstrap** | Creates deployment buckets and shared parameters required for the deployment process. |
+| **Global** | Deploys shared infrastructure such as Route 53, ACM certificates, and DNS configuration. |
+| **Foundation** | Deploys shared application services including Cognito, DynamoDB, IAM resources, and the Lambda Layer. |
+| **Application** | Deploys Lambda functions, API Gateway, custom domain mapping, and application-specific resources. |
+
+---
+
+## Repository Structure
+
+```text
+.
+├── cloudformation/
+│   ├── bootstrap/
+│   ├── global/
+│   ├── foundation/
+│   └── application/
+│
+├── lambda/
+│   ├── layer/
+│   └── functions/
+│
+├── scripts/
+│
+├── deploy.sh
+├── destroy.sh
+└── README.md
+```
+
+The repository separates infrastructure, application code, and deployment automation to keep the project modular and easy to maintain.
+
+---
+
+## Prerequisites
+
+Before deploying the project, ensure the following requirements are met:
+
+- AWS CLI v2
+- An AWS account with sufficient permissions
+- Git
+- Bash (Linux or macOS)
+- Python 3.x (if required for Lambda packaging)
+
+---
+
+## Quick Start
+
+Clone the repository:
+
+```bash
+git clone https://github.com/zbalci/ledger-app-aws-serverless.git
+cd ledger-app-aws-serverless
+```
+
+Deploy the complete infrastructure:
+
+```bash
+./deploy.sh --all
+```
+
+Destroy all deployed resources:
+
+```bash
+./destroy.sh
+```
+---
+
+## Continuous Integration and Deployment
+
+The project includes an AWS-native CI/CD pipeline built with CodePipeline and CodeBuild.
+
+The pipeline automatically:
+
+- Retrieves the latest source code from GitHub
+- Builds and packages Lambda functions
+- Uploads deployment artifacts
+- Updates CloudFormation stacks
+- Deploys the latest application version
+
+---
 
 ### Summary
 
