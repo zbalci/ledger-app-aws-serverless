@@ -83,6 +83,26 @@ The deployment separates shared infrastructure from application-specific resourc
 
 ---
 
+## Deployment Workflow
+
+The entire infrastructure can be provisioned using a single deployment script.
+
+The deployment process is divided into multiple logical stages. Each stage is responsible for provisioning a specific layer of the infrastructure while respecting stack dependencies.
+
+```mermaid
+flowchart TD
+    A[deploy.sh] --> B[Bootstrap]
+    B --> C[Upload CloudFormation Templates]
+    C --> D[Global Stack]
+    D --> E[Foundation Stack]
+    E --> F[Application Stack]
+    F --> G[Deployment Complete]
+```
+
+---
+
+
+
 ### Summary
 
 This project is designed as a **realistic AWS Serverless portfolio**:
