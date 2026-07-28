@@ -1,119 +1,85 @@
-# Ledger App – AWS Serverless Portfolio Project
+# Ledger App – AWS Serverless
 
-Ledger App is a minimal transactional ledger service built as a **reference portfolio project** to demonstrate an **end‑to‑end, production‑style AWS Serverless architecture** built entirely with **CloudFormation (nested stacks)** and deployed via **CodePipeline**.
-The goal is to showcase how a serverless application can be deployed in **dev/prod environments** using **Lambda**,**Gateway API**,**DynamoDB**,**Cognito**, while keeping infrastructure modular, secure, and reproducible.
+A production-style serverless application deployed entirely on AWS using Infrastructure as Code (CloudFormation). The project demonstrates a complete deployment workflow built around AWS Lambda, API Gateway, Cognito, DynamoDB, Route 53, ACM, CodePipeline, and CodeBuild.
 
-The application consists of a small Python web service backed by a NoSQL database. It supports basic CRUD operations and is intentionally kept simple so the infrastructure and pipeline design remain the primary point of interest.
+The infrastructure is organized into modular nested CloudFormation stacks and can be provisioned or destroyed using a single deployment script. The project focuses on automation, repeatability, and maintainability, making it suitable as a reference implementation for modern serverless deployments.
 
 ![Ledger App](docs/diagrams/01-ledger-app.png)
 
-### Project Goals
+## Highlights
 
-* Demonstrate **Infrastructure as Code** using CloudFormation
-* Implement **CI/CD pipelines** with CodePipeline and CodeBuild
-* Support **multiple deployment strategies** (Rolling / Blue‑Green)
-* Run workloads on **Amazon Lambda** with Serverless services
-* Securely provision and limit access via **Cognito**
-* Separate **one‑time database initialization** from application runtime
+- Fully serverless architecture built on AWS managed services
+- Modular nested CloudFormation stacks
+- One-command deployment and cleanup
+- Automated custom domain configuration with Route 53 and ACM
+- Secure authentication using Amazon Cognito
+- REST API powered by API Gateway and AWS Lambda
+- DynamoDB for scalable NoSQL data storage
+- CI/CD pipeline using GitHub, CodePipeline and CodeBuild
+- Shared Lambda Layer for dependency management
+- Parameter Store integration for configuration sharing
 
-### Repository Structure
+## Architecture
 
-```text
-├── infrastructure
-│   ├── cicd                            # codebuild files
-│   │   └── lambda
-│   │       ├── function
-│   │       │   └── buildspec.yml
-│   │       └── layer
-│   │           └── buildspec.yml
-│   └── cloudformation                  # cfn templates
-│       ├── app
-│       │   ├── api_gateway
-│       │   │   └── http-api.yaml
-│       │   ├── build
-│       │   │   ├── iam-role.yaml
-│       │   │   ├── project.yaml
-│       │   │   └── stack.yaml
-│       │   ├── cognito
-│       │   │   └── user-pool.yaml
-│       │   ├── dynamodb
-│       │   │   └── tables.yaml
-│       │   ├── lambda
-│       │   │   ├── iam-role.yaml
-│       │   │   ├── lambda-function.yaml
-│       │   │   ├── lambda-layer.yaml
-│       │   │   └── stack.yaml
-│       │   ├── pipeline
-│       │   │   ├── iam-role.yaml
-│       │   │   ├── pipeline.yaml
-│       │   │   └── stack.yaml
-│       │   └── stack.yaml
-│       ├── bootstrap
-│       │   └── s3-iac.yaml
-│       ├── foundation
-│       │   ├── acm-certificate.yaml
-│       │   ├── logging.yaml
-│       │   ├── s3-artifacts.yaml
-│       │   └── stack.yaml
-│       └── global
-│           ├── dns.yaml
-│           └── stack.yaml
-├── scripts
-│   ├── build-layer.sh                   # dummy layer creator for first deployment
-│   ├── deploy.sh                        # automated deployment bash script
-│   └── destroy.sh                       # automated destroying bash script
-└── src                                  # app source code
-    ├── layers
-    │   └── python
-    │       └── requirements.txt
-    └── web
-        ├── app
-        │   ├── auth
-        │   │   └── cognito.py
-        │   ├── connector.py
-        │   ├── extensions.py
-        │   ├── __init__.py
-        │   ├── main
-        │   │   ├── __init__.py
-        │   │   ├── login.py
-        │   │   └── routes.py
-        │   ├── static
-        │   │   └── css
-        │   │       └── styles.css
-        │   ├── templates
-        │   │   ├── edit.html
-        │   │   ├── form.html
-        │   │   └── transactions.html
-        ├── config.py
-        ├── lambda_function.py
-        └── tests                         # app unit tests
-            ├── __init__.py
-            └── test_app.py
-```
+The application follows a fully serverless architecture where authentication, API processing, and data persistence are provided entirely by managed AWS services.
 
-### High‑Level Architecture
+The deployment separates shared infrastructure from application-specific resources through multiple CloudFormation stacks. This approach improves maintainability, enables independent updates, and simplifies environment provisioning.
 
-![CloudFormation Stacks](docs/diagrams/02-cfn-stacks.png)  
+![CloudFormation Stacks](docs/diagrams/02-cfn-stacks.png)
 
-#### 1. Bootstrap Stack
+### Architecture Components
 
-#### 2. Global Stack
+| Component | Purpose |
+|-----------|---------|
+| Route 53 | DNS hosting |
+| ACM | SSL certificate management |
+| API Gateway | Public REST API |
+| Lambda | Business logic |
+| Cognito | User authentication |
+| DynamoDB | Persistent storage |
+| S3 | Deployment artifacts |
+| CloudFormation | Infrastructure provisioning |
+| CodePipeline | Continuous deployment |
+| CodeBuild | Application build process |
 
-#### 3. Foundation Stack
+## Key Features
 
-#### 4. App Stack
+### Infrastructure
 
----
+- Infrastructure as Code using nested CloudFormation stacks
+- Modular stack organization
+- Automated stack dependency management
+- Environment-specific configuration
+- Shared resources isolated from application resources
 
-### CI/CD Pipeline Flow
+### Deployment
+
+- Single-command deployment
+- Partial deployment support
+- Dry-run mode
+- Automatic template synchronization
+- Bootstrap resource provisioning
+
+### Application
+
+- JWT authentication with Amazon Cognito
+- REST API using API Gateway
+- Stateless Lambda functions
+- Shared Lambda Layer
+- DynamoDB persistence
+
+![App Flow](docs/diagrams/05-app-flow.png)
+
+### CI/CD
+
+- GitHub integration
+- Automated CloudFormation deployments
+- Automated Lambda packaging
+- Continuous delivery through CodePipeline
+
 ![Pipeline Flow](docs/diagrams/03-pipeline-flow.png)
 
 <p align="center"> <img width="700" height="295" src="docs/diagrams/04-build-detail.png"> </p>
-
----
-
-### App Flow
-![App Flow](docs/diagrams/05-app-flow.png)
 
 ---
 
