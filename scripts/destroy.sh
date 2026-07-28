@@ -320,17 +320,17 @@ main() {
 
     delete_stack "${APP_NAME}-app"
 
-    delete_stack "${APP_NAME}-foundation"
-
-    delete_hosted_zone_records
-
-    delete_stack "${APP_NAME}-global"
-
     if ARTIFACT_BUCKET=$(get_ssm_parameter "/${APP_NAME}/artifact_bucket_s3"); then
         empty_bucket "$ARTIFACT_BUCKET"
     else
         warn "Artifact bucket parameter not found."
     fi
+
+    delete_stack "${APP_NAME}-foundation"
+
+    delete_hosted_zone_records
+
+    delete_stack "${APP_NAME}-global"
 
     if IAC_BUCKET=$(get_ssm_parameter "/${APP_NAME}/iac_bucket_s3"); then
         empty_bucket "$IAC_BUCKET"

@@ -5,8 +5,7 @@ Parameters:
 Resources:
   IaCBucket:
     Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+    DeletionPolicy: Delete
     Properties:
       BucketName: !Sub "${AppName}-${AWS::AccountId}-serverless-iac"
       PublicAccessBlockConfiguration:

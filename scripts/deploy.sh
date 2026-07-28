@@ -517,8 +517,17 @@ main() {
         info "[PLAN] Dry-run completed."
         return
     else
-        echo
         success "Deployment completed successfully."
+
+        echo
+        echo "=========================================================="
+        echo " Deployment Summary"
+        echo "=========================================================="
+        echo
+        printf "%-18s %s\n" "Environment:" "$ENVIRONMENT"
+        printf "%-18s %s\n" "AWS Region:" "$AWS_REGION"
+        printf "%-18s %s\n" "Application URL:" "https://${APP_NAME}-${ENVIRONMENT}.${ROOT_DOMAIN}/"
+        echo
     fi
 
 }
