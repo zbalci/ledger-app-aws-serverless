@@ -196,13 +196,6 @@ During cleanup the script automatically:
 
 The infrastructure is organized into multiple nested CloudFormation stacks. Each layer has a well-defined responsibility and depends only on the resources it requires.
 
-```mermaid
-flowchart TD
-    A[Bootstrap] --> B[Global]
-    B --> C[Foundation]
-    C --> D[Application]
-```
-
 | Stack | Responsibility |
 |--------|----------------|
 | **Bootstrap** | Creates deployment buckets and shared parameters required for the deployment process. |
