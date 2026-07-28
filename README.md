@@ -99,6 +99,63 @@ flowchart TD
     F --> G[Deployment Complete]
 ```
 
+## Deployment Options
+
+The deployment script supports both full and partial deployments.
+
+| Option | Description |
+|---------|-------------|
+| `--all` | Deploy the complete infrastructure |
+| `--bootstrap-only` | Deploy only the bootstrap stack |
+| `--global-only` | Deploy only shared global resources |
+| `--foundation-only` | Deploy only the foundation layer |
+| `--app-only` | Deploy only the application stack |
+| `--skip-layer` | Skip Lambda Layer deployment |
+| `--dry-run` | Print commands without executing them |
+| `--help` | Display available options |
+
+## Examples
+
+Deploy the entire infrastructure:
+
+```bash
+./deploy.sh --all
+```
+
+Deploy only shared infrastructure:
+
+```bash
+./deploy.sh --global-only
+```
+
+Deploy only the application:
+
+```bash
+./deploy.sh --app-only
+```
+
+Preview the deployment:
+
+```bash
+./deploy.sh --all --dry-run
+```
+
+## Destroy Workflow
+
+The infrastructure can be removed using the companion destroy script.
+
+Resources are deleted in reverse dependency order to avoid CloudFormation failures.
+
+```mermaid
+flowchart TD
+    A[destroy.sh]
+    A --> B[Application Stack]
+    B --> C[Foundation Stack]
+    C --> D[Global Stack]
+    D --> E[Bootstrap Stack]
+    E --> F[Cleanup Complete]
+```
+
 ---
 
 
