@@ -122,20 +122,6 @@ The deployment separates shared infrastructure from application-specific resourc
 
 The entire infrastructure can be provisioned using a single deployment script.
 
-The deployment process is divided into multiple logical stages. Each stage is responsible for provisioning a specific layer of the infrastructure while respecting stack dependencies.
-
-```mermaid
-flowchart TD
-    A[deploy.sh] --> B[Bootstrap]
-    B --> C[Upload CloudFormation Templates]
-    C --> D[Global Stack]
-    D --> E[Foundation Stack]
-    E --> F[Application Stack]
-    F --> G[Deployment Complete]
-```
-
-## Deployment Options
-
 The deployment script supports both full and partial deployments.
 
 | Option | Description |
@@ -180,16 +166,6 @@ Preview the deployment:
 The infrastructure can be removed using the companion destroy script.
 
 Resources are deleted in reverse dependency order to avoid CloudFormation failures.
-
-```mermaid
-flowchart TD
-    A[destroy.sh]
-    A --> B[Application Stack]
-    B --> C[Foundation Stack]
-    C --> D[Global Stack]
-    D --> E[Bootstrap Stack]
-    E --> F[Cleanup Complete]
-```
 
 During cleanup the script automatically:
 
