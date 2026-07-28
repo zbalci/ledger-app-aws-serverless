@@ -26,6 +26,28 @@ Clone the repository:
 git clone https://github.com/zbalci/ledger-app-aws-serverless.git
 cd ledger-app-aws-serverless
 ```
+### Repository Structure
+
+```text
+.
+├── cloudformation/
+│   ├── bootstrap/
+│   ├── global/
+│   ├── foundation/
+│   └── application/
+│
+├── lambda/
+│   ├── layer/
+│   └── functions/
+│
+├── scripts/
+│
+├── deploy.sh
+├── destroy.sh
+└── README.md
+```
+
+### Deployment
 
 Deploy the complete infrastructure:
 
@@ -61,21 +83,6 @@ The application follows a fully serverless architecture where authentication, AP
 The deployment separates shared infrastructure from application-specific resources through multiple CloudFormation stacks. This approach improves maintainability, enables independent updates, and simplifies environment provisioning.
 
 ![CloudFormation Stacks](docs/diagrams/02-cfn-stacks.png)
-
-### Architecture Components
-
-| Component | Purpose |
-|-----------|---------|
-| Route 53 | DNS hosting |
-| ACM | SSL certificate management |
-| API Gateway | Public REST API |
-| Lambda | Business logic |
-| Cognito | User authentication |
-| DynamoDB | Persistent storage |
-| S3 | Deployment artifacts |
-| CloudFormation | Infrastructure provisioning |
-| CodePipeline | Continuous deployment |
-| CodeBuild | Application build process |
 
 ## Key Features
 
@@ -205,26 +212,6 @@ The infrastructure is organized into multiple nested CloudFormation stacks. Each
 
 ---
 
-## Repository Structure
-
-```text
-.
-├── cloudformation/
-│   ├── bootstrap/
-│   ├── global/
-│   ├── foundation/
-│   └── application/
-│
-├── lambda/
-│   ├── layer/
-│   └── functions/
-│
-├── scripts/
-│
-├── deploy.sh
-├── destroy.sh
-└── README.md
-```
 
 The repository separates infrastructure, application code, and deployment automation to keep the project modular and easy to maintain.
 
