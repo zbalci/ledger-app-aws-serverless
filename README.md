@@ -93,7 +93,6 @@ The application consists of a small Python web service backed by a NoSQL databas
 
 ### High‑Level Architecture
 
-The infrastructure is organized into **two logical layers**: Foundation and Root.
 ![CloudFormation Stacks](docs/diagrams/02-cfn-stacks.png)  
 
 #### 1. Bootstrap Stack
