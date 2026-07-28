@@ -109,10 +109,7 @@ The infrastructure is organized into **two logical layers**: Foundation and Root
 ### CI/CD Pipeline Flow
 ![Pipeline Flow](docs/diagrams/03-pipeline-flow.png)
 
-<p align="center">
-  <img width="460" height="300" src="docs/diagrams/04-build-detail.png">
-</p>
-
+<p align="center"> <img width="700" height="295" src="docs/diagrams/04-build-detail.png"> </p>
 ---
 
 ### App Flow
