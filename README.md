@@ -237,13 +237,13 @@ cd ledger-app-aws-serverless
 Deploy the complete infrastructure:
 
 ```bash
-./deploy.sh --all
+./scripts/deploy.sh --all
 ```
 
 Destroy all deployed resources:
 
 ```bash
-./destroy.sh
+./scripts/destroy.sh
 ```
 ---
 
