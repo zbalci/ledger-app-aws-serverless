@@ -6,6 +6,41 @@ The infrastructure is organized into modular nested CloudFormation stacks and ca
 
 ![Ledger App](docs/diagrams/01-ledger-app.png)
 
+## Prerequisites
+
+Before deploying the project, ensure the following requirements are met:
+
+- AWS CLI v2
+- An AWS account with sufficient permissions
+- Git
+- Bash (Linux or macOS)
+- Python 3.x (if required for Lambda packaging)
+
+---
+
+## Quick Start
+
+Clone the repository:
+
+```bash
+git clone https://github.com/zbalci/ledger-app-aws-serverless.git
+cd ledger-app-aws-serverless
+```
+
+Deploy the complete infrastructure:
+
+```bash
+./scripts/deploy.sh --all
+```
+
+Destroy all deployed resources:
+
+```bash
+./scripts/destroy.sh
+```
+
+---
+
 ## Highlights
 
 - Fully serverless architecture built on AWS managed services
@@ -80,41 +115,6 @@ The deployment separates shared infrastructure from application-specific resourc
 ![Pipeline Flow](docs/diagrams/03-pipeline-flow.png)
 
 <p align="center"> <img width="700" height="295" src="docs/diagrams/04-build-detail.png"> </p>
-
----
-
-## Prerequisites
-
-Before deploying the project, ensure the following requirements are met:
-
-- AWS CLI v2
-- An AWS account with sufficient permissions
-- Git
-- Bash (Linux or macOS)
-- Python 3.x (if required for Lambda packaging)
-
----
-
-## Quick Start
-
-Clone the repository:
-
-```bash
-git clone https://github.com/zbalci/ledger-app-aws-serverless.git
-cd ledger-app-aws-serverless
-```
-
-Deploy the complete infrastructure:
-
-```bash
-./scripts/deploy.sh --all
-```
-
-Destroy all deployed resources:
-
-```bash
-./scripts/destroy.sh
-```
 
 ---
 
