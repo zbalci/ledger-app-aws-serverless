@@ -156,6 +156,16 @@ flowchart TD
     E --> F[Cleanup Complete]
 ```
 
+During cleanup the script automatically:
+
+- Deletes application resources first
+- Removes shared infrastructure
+- Empties S3 buckets when required
+- Deletes the bootstrap resources
+- Removes deployment artifacts
+- Cleans up SSM parameters created during deployment
+- Removes Route 53 validation and alias records to enable hosted zone deletion
+
 ---
 
 
