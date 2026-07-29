@@ -165,8 +165,15 @@ The project includes two independent AWS-native CI/CD pipelines built with CodeP
 
 This separation allows Lambda Layers and application code to be released independently while ensuring that function deployments always reference the latest compatible layer.
 
-
 ![Pipeline Flow](docs/diagrams/03-pipeline-flow.png)
+
+### Build Pipeline Details
+
+Each pipeline includes automated quality and security checks before deployment.
+
+The **Function Pipeline** builds the application, runs unit and integration tests, performs static code analysis with **Bandit**, scans dependencies with **Trivy**, and deploys the updated Lambda function.
+
+The **Layer Pipeline** builds the shared Lambda Layer, audits Python dependencies with **pip-audit**, performs vulnerability scanning with **Trivy**, publishes a new layer version, and generates a Software Bill of Materials (SBOM) stored in Amazon S3.
 
 <p align="center">
   <img width="700" src="docs/diagrams/04-build-detail.png">
