@@ -82,6 +82,8 @@ To remove all deployed resources:
 
 The application follows a fully serverless architecture where authentication, API processing, and data persistence are provided entirely by managed AWS services.
 
+![App Flow](docs/diagrams/05-app-flow.png)
+
 Infrastructure is separated into four logical CloudFormation layers, allowing independent updates, reusable components, and clean dependency management.
 
 ![CloudFormation Stacks](docs/diagrams/02-cfn-stacks.png)
@@ -92,8 +94,6 @@ Infrastructure is separated into four logical CloudFormation layers, allowing in
 | **Global** | Deploys Route 53 |
 | **Foundation** | Deploys ACM certificate, creates log groups and artifact bucket |
 | **Application** | Deploys API Gateway, Lambda, DynamoDB, Cognito, CodeBuild, CodePipeline, IAM resources and application resources. |
-
-![App Flow](docs/diagrams/05-app-flow.png)
 
 ---
 
