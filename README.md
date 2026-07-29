@@ -173,10 +173,15 @@ Each pipeline includes automated quality and security checks before deployment.
 
 The **Function Pipeline** builds the application, runs unit and integration tests, performs static code analysis with **Bandit**, scans dependencies with **Trivy**, and deploys the updated Lambda function.
 
+<p align="center">
+  <img width="700" src="docs/diagrams/04-build-detail-1.png">
+</p>
+
+
 The **Layer Pipeline** builds the shared Lambda Layer, audits Python dependencies with **pip-audit**, performs vulnerability scanning with **Trivy**, publishes a new layer version, and generates a Software Bill of Materials (SBOM) stored in Amazon S3.
 
 <p align="center">
-  <img width="700" src="docs/diagrams/04-build-detail.png">
+  <img width="700" src="docs/diagrams/04-build-detail-2.png">
 </p>
 
 ---
