@@ -90,10 +90,10 @@ Infrastructure is separated into four logical CloudFormation layers, allowing in
 
 | Stack | Responsibility |
 |--------|----------------|
-| **Bootstrap** | Creates deployment buckets and shared parameters required by the deployment process. |
-| **Global** | Deploys Route 53 |
-| **Foundation** | Deploys ACM certificate, creates log groups and artifact bucket |
-| **Application** | Deploys API Gateway, Lambda, DynamoDB, Cognito, CodeBuild, CodePipeline, IAM resources and application resources. |
+| **Bootstrap** | Creates the deployment buckets and shared parameters required by the deployment process. |
+| **Global** | Creates the root Route 53 hosted zone used to manage DNS records for all environments (for example, dev and prod). |
+| **Foundation** | Provisions shared infrastructure, including the ACM certificate, CloudWatch log groups, and deployment artifact bucket. |
+| **Application** | Deploys the application resources, including API Gateway, Lambda, DynamoDB, Cognito, IAM resources, CodeBuild, CodePipeline, and environment-specific DNS records. |
 
 ---
 
@@ -158,15 +158,13 @@ Resources are removed in reverse dependency order. During cleanup the script als
 
 ## Continuous Integration and Deployment
 
-The project includes an AWS-native CI/CD pipeline built with CodePipeline and CodeBuild.
+The project includes two independent AWS-native CI/CD pipelines built with CodePipeline and CodeBuild:
 
-The pipeline automatically:
+- **Layer Pipeline** monitors changes under `src/layers/*`, builds and publishes a new Lambda Layer version, then updates the latest Layer ARN in AWS Systems Manager Parameter Store.
+- **Function Pipeline** monitors changes under `src/web/*`, retrieves the latest Layer ARN from Parameter Store, packages the application, and deploys a new Lambda Function version.
 
-- Retrieves the latest source code from GitHub
-- Packages Lambda functions
-- Uploads deployment artifacts
-- Updates CloudFormation stacks
-- Deploys the latest application version
+This separation allows Lambda Layers and application code to be released independently while ensuring that function deployments always reference the latest compatible layer.
+
 
 ![Pipeline Flow](docs/diagrams/03-pipeline-flow.png)
 
