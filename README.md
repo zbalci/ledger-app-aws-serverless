@@ -89,9 +89,9 @@ Infrastructure is separated into four logical CloudFormation layers, allowing in
 | Stack | Responsibility |
 |--------|----------------|
 | **Bootstrap** | Creates deployment buckets and shared parameters required by the deployment process. |
-| **Global** | Deploys Route 53, ACM certificates, and shared DNS resources. |
-| **Foundation** | Deploys Cognito, DynamoDB, IAM resources, and the shared Lambda Layer. |
-| **Application** | Deploys Lambda functions, API Gateway, custom domain mapping, and application resources. |
+| **Global** | Deploys Route 53 |
+| **Foundation** | Deploys ACM certificate, creates log groups and artifact bucket |
+| **Application** | Deploys API Gateway, Lambda, DynamoDB, Cognito, CodeBuild, CodePipeline, IAM resources and application resources. |
 
 ![App Flow](docs/diagrams/05-app-flow.png)
 
